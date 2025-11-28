@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
 use crate::autostart::AutostartEntry;
+use libadwaita as adw;
 use adw::prelude::*;
 use adw::subclass::prelude::*;
 use gettextrs::gettext;
@@ -32,7 +33,7 @@ mod imp {
 glib::wrapper! {
     pub struct EntryRow(ObjectSubclass<imp::EntryRow>)
         @extends gtk::Widget, gtk::ListBoxRow, adw::PreferencesRow, adw::ActionRow,
-        @implements gtk::Accessible, gtk::Actionable, gtk::Buildable;
+        @implements gtk::Accessible, gtk::Actionable, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 impl EntryRow {

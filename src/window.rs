@@ -2,16 +2,18 @@
 
 use crate::autostart::AutostartEntry;
 use crate::entry_row::EntryRow;
+use libadwaita as adw;
 use adw::prelude::*;
 use adw::subclass::prelude::*;
 use gettextrs::gettext;
+use glib::prelude::IsA;
 use gtk::{gio, glib};
 
 mod imp {
     use super::*;
 
     #[derive(Debug, Default, gtk::CompositeTemplate)]
-    #[template(resource = "/ch/srueegger/bootmate/window.ui")]
+    #[template(resource = "/ch/srueegger/bootmate/ui/window.ui")]
     pub struct BootMateWindow {
         #[template_child]
         pub header_bar: TemplateChild<adw::HeaderBar>,
@@ -22,7 +24,13 @@ mod imp {
         #[template_child]
         pub scrolled_window: TemplateChild<gtk::ScrolledWindow>,
         #[template_child]
-        pub list_box: TemplateChild<gtk::ListBox>,
+        pub user_group: TemplateChild<gtk::Box>,
+        #[template_child]
+        pub user_list_box: TemplateChild<gtk::ListBox>,
+        #[template_child]
+        pub system_group: TemplateChild<gtk::Box>,
+        #[template_child]
+        pub system_list_box: TemplateChild<gtk::ListBox>,
     }
 
     #[glib::object_subclass]
@@ -58,11 +66,12 @@ mod imp {
 glib::wrapper! {
     pub struct BootMateWindow(ObjectSubclass<imp::BootMateWindow>)
         @extends gtk::Widget, gtk::Window, gtk::ApplicationWindow, adw::ApplicationWindow,
-        @implements gio::ActionGroup, gio::ActionMap;
+        @implements gio::ActionGroup, gio::ActionMap, gtk::Accessible, gtk::Buildable,
+                    gtk::ConstraintTarget, gtk::Native, gtk::Root, gtk::ShortcutManager;
 }
 
 impl BootMateWindow {
-    pub fn new(app: &adw::Application) -> Self {
+    pub fn new<P: IsA<adw::Application>>(app: &P) -> Self {
         glib::Object::builder().property("application", app).build()
     }
 
@@ -79,9 +88,12 @@ impl BootMateWindow {
     pub fn load_autostart_entries(&self) {
         let imp = self.imp();
 
-        // Clear existing entries
-        while let Some(child) = imp.list_box.first_child() {
-            imp.list_box.remove(&child);
+        // Clear existing entries from both lists
+        while let Some(child) = imp.user_list_box.first_child() {
+            imp.user_list_box.remove(&child);
+        }
+        while let Some(child) = imp.system_list_box.first_child() {
+            imp.system_list_box.remove(&child);
         }
 
         // Load autostart entries
@@ -94,11 +106,34 @@ impl BootMateWindow {
             )));
             imp.main_stack.set_visible_child_name("empty");
         } else {
-            // Add entries to list
+            // Separate entries into user and system
+            let mut user_entries = Vec::new();
+            let mut system_entries = Vec::new();
+
             for entry in entries {
-                let row = EntryRow::new(&entry);
-                imp.list_box.append(&row);
+                if entry.is_user_entry {
+                    user_entries.push(entry);
+                } else {
+                    system_entries.push(entry);
+                }
             }
+
+            // Add user entries to user list
+            for entry in &user_entries {
+                let row = EntryRow::new(entry);
+                imp.user_list_box.append(&row);
+            }
+
+            // Add system entries to system list
+            for entry in &system_entries {
+                let row = EntryRow::new(entry);
+                imp.system_list_box.append(&row);
+            }
+
+            // Show/hide groups based on whether they have entries
+            imp.user_group.set_visible(!user_entries.is_empty());
+            imp.system_group.set_visible(!system_entries.is_empty());
+
             imp.main_stack.set_visible_child_name("list");
         }
     }

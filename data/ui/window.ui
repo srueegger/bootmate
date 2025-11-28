@@ -55,13 +55,81 @@
                             <property name="margin-bottom">24</property>
                             <property name="margin-start">12</property>
                             <property name="margin-end">12</property>
-                            <property name="spacing">12</property>
+                            <property name="spacing">24</property>
+
+                            <!-- User Autostart Entries -->
                             <child>
-                              <object class="GtkListBox" id="list_box">
-                                <property name="selection-mode">none</property>
-                                <style>
-                                  <class name="boxed-list"/>
-                                </style>
+                              <object class="GtkBox" id="user_group">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">12</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label" translatable="yes">User Autostart</property>
+                                    <property name="xalign">0</property>
+                                    <style>
+                                      <class name="title-4"/>
+                                    </style>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label" translatable="yes">Applications that start automatically for your user account</property>
+                                    <property name="xalign">0</property>
+                                    <property name="wrap">True</property>
+                                    <property name="wrap-mode">word-char</property>
+                                    <property name="max-width-chars">60</property>
+                                    <style>
+                                      <class name="dim-label"/>
+                                      <class name="caption"/>
+                                    </style>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkListBox" id="user_list_box">
+                                    <property name="selection-mode">none</property>
+                                    <style>
+                                      <class name="boxed-list"/>
+                                    </style>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+
+                            <!-- System Autostart Entries -->
+                            <child>
+                              <object class="GtkBox" id="system_group">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">12</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label" translatable="yes">System Autostart</property>
+                                    <property name="xalign">0</property>
+                                    <style>
+                                      <class name="title-4"/>
+                                    </style>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label" translatable="yes">System-wide applications that start automatically</property>
+                                    <property name="xalign">0</property>
+                                    <property name="wrap">True</property>
+                                    <property name="wrap-mode">word-char</property>
+                                    <property name="max-width-chars">60</property>
+                                    <style>
+                                      <class name="dim-label"/>
+                                      <class name="caption"/>
+                                    </style>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkListBox" id="system_list_box">
+                                    <property name="selection-mode">none</property>
+                                    <style>
+                                      <class name="boxed-list"/>
+                                    </style>
+                                  </object>
+                                </child>
                               </object>
                             </child>
                           </object>
