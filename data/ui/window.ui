@@ -76,6 +76,8 @@
                                     <property name="label" translatable="yes">Applications that start automatically for your user account</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
+                                    <property name="wrap-mode">word-char</property>
+                                    <property name="max-width-chars">60</property>
                                     <style>
                                       <class name="dim-label"/>
                                       <class name="caption"/>
@@ -112,6 +114,8 @@
                                     <property name="label" translatable="yes">System-wide applications that start automatically</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
+                                    <property name="wrap-mode">word-char</property>
+                                    <property name="max-width-chars">60</property>
                                     <style>
                                       <class name="dim-label"/>
                                       <class name="caption"/>
