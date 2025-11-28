@@ -172,6 +172,7 @@ impl AutostartEntry {
         content.push_str("Type=Application\n");
         content.push_str(&format!("Name={}\n", self.name));
         content.push_str(&format!("Exec={}\n", new_exec));
+        content.push_str("Terminal=false\n");
 
         if let Some(icon) = &self.icon {
             content.push_str(&format!("Icon={}\n", icon));
@@ -181,7 +182,9 @@ impl AutostartEntry {
             content.push_str(&format!("Comment={}\n", comment));
         }
 
-        if !self.enabled {
+        if self.enabled {
+            content.push_str("X-GNOME-Autostart-enabled=true\n");
+        } else {
             content.push_str("X-GNOME-Autostart-enabled=false\n");
         }
 
