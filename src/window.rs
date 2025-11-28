@@ -10,7 +10,6 @@ use gettextrs::gettext;
 use glib::prelude::IsA;
 use gtk::{gio, glib};
 use std::cell::RefCell;
-use std::path::PathBuf;
 use std::rc::Rc;
 
 mod imp {
@@ -308,6 +307,18 @@ impl BootMateWindow {
                         return;
                     }
 
+                    // Generate a filename from the entry name
+                    let filename = name
+                        .to_lowercase()
+                        .replace(" ", "-")
+                        .chars()
+                        .filter(|c| c.is_alphanumeric() || *c == '-')
+                        .collect::<String>()
+                        + ".desktop";
+
+                    let user_dir = glib::user_config_dir();
+                    let file_path = user_dir.join("autostart").join(&filename);
+
                     // Create new autostart entry
                     let entry = AutostartEntry {
                         name: name.to_string(),
@@ -315,7 +326,7 @@ impl BootMateWindow {
                         icon: None,
                         comment: None,
                         enabled: true,
-                        file_path: PathBuf::new(), // Will be set when saving
+                        file_path,
                         is_user_entry: true,
                     };
 
