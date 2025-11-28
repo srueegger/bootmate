@@ -3,7 +3,7 @@
 use std::process::Command;
 
 fn main() {
-    // Compile GResources
+    // Compile GResources to src directory so include_bytes! can find it
     let out = Command::new("glib-compile-resources")
         .args([
             "--sourcedir=data",

@@ -3,6 +3,7 @@
 use crate::config::VERSION;
 use crate::window::BootMateWindow;
 
+use libadwaita as adw;
 use adw::prelude::*;
 use adw::subclass::prelude::*;
 use gettextrs::gettext;
