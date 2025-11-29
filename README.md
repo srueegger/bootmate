@@ -13,7 +13,7 @@ A modern GNOME application for managing autostart entries, built with Rust and l
 
 ## Screenshots
 
-![Main Window](screenshots/main-window.png)
+![Main Window](screenshot.png)
 
 ## Requirements
 
@@ -90,6 +90,29 @@ Or from the build directory without installing:
 ```
 
 Or launch from your application menu: **Boot Mate**
+
+## Building a Debian Package
+
+To create a `.deb` package for Debian/Ubuntu distributions:
+
+```bash
+# Install cargo-deb (one-time only)
+cargo install cargo-deb
+
+# Build the release version
+cargo build --release
+
+# Create the .deb package
+cargo deb
+```
+
+The package will be created in `target/debian/bootmate_0.1.0_<arch>.deb` and can be installed with:
+
+```bash
+sudo dpkg -i target/debian/bootmate_0.1.0_<arch>.deb
+```
+
+**Note:** The cargo-deb package includes only the compiled binary. For a complete installation with all resources (icons, translations, etc.), use the Meson installation method instead.
 
 ## Building a Snap
 
