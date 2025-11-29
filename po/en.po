@@ -29,8 +29,6 @@ msgid "autostart;startup;boot;session;"
 msgstr "autostart;startup;boot;session;"
 
 #: data/ui/window.ui:6
-msgid "Boot Mate"
-msgstr "Boot Mate"
 
 #: data/ui/window.ui:14
 msgid "Main Menu"
@@ -85,17 +83,4 @@ msgid "This action cannot be undone."
 msgstr "This action cannot be undone."
 
 #: src/application.rs
-msgid "Boot Mate"
-msgstr "Boot Mate"
-
-#: src/application.rs
-msgid "Manage autostart entries"
-msgstr "Manage autostart entries"
-
 #: src/window.rs
-msgid "No Autostart Entries"
-msgstr "No Autostart Entries"
-
-#: src/window.rs
-msgid "No applications are configured to start automatically"
-msgstr "No applications are configured to start automatically"

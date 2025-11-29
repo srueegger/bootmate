@@ -13,7 +13,7 @@ A modern GNOME application for managing autostart entries, built with Rust and l
 
 ## Screenshots
 
-![Main Window](screenshots/main-window.png)
+![Main Window](screenshot.png)
 
 ## Requirements
 
