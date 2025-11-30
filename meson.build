@@ -1,7 +1,7 @@
 project(
   'bootmate',
   'rust',
-  version: '1.0.0',
+  version: '1.1.0',
   license: 'GPL-2.0-only',
   meson_version: '>= 0.59.0',
 )
@@ -14,7 +14,7 @@ base_id = 'ch.srueegger.bootmate'
 dependency('glib-2.0', version: '>= 2.66')
 dependency('gio-2.0', version: '>= 2.66')
 dependency('gtk4', version: '>= 4.10')
-dependency('libadwaita-1', version: '>= 1.4')
+dependency('libadwaita-1', version: '>= 1.5')
 
 cargo = find_program('cargo', required: true)
 glib_compile_resources = find_program('glib-compile-resources', required: true)
