@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <!-- Symbolic icon for Boot Mate - simplified rocket for small sizes -->
+  <g fill="#2e3436" fill-rule="evenodd">
+    <!-- Rocket body -->
+    <rect x="6" y="4" width="4" height="9" rx="0.5"/>
+
+    <!-- Rocket nose cone -->
+    <path d="M 6,4 L 8,1 L 10,4 Z"/>
+
+    <!-- Left fin -->
+    <path d="M 6,9 L 6,13 L 4,13 L 5,11 Z"/>
+
+    <!-- Right fin -->
+    <path d="M 10,9 L 10,13 L 12,13 L 11,11 Z"/>
+
+    <!-- Launch platform -->
+    <rect x="2" y="14" width="12" height="1.5" rx="0.5"/>
+
+    <!-- Window -->
+    <circle cx="8" cy="7" r="1" fill="#2e3436" opacity="0.3"/>
+  </g>
+</svg>

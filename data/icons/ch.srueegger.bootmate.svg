@@ -1,34 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <!-- Simple placeholder icon for Boot Mate -->
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+    <!-- GNOME Blue palette colors -->
+    <linearGradient id="rocketBody" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3584e4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1c71d8;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="rocketTop" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" style="stop-color:#62a0ea;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#3584e4;stop-opacity:1" />
     </linearGradient>
+
+    <linearGradient id="flame" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff7800;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#e01b24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c01c28;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="platform" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#77767b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5e5c64;stop-opacity:1" />
+    </linearGradient>
   </defs>
 
-  <!-- Background rounded rectangle -->
-  <rect width="128" height="128" rx="24" fill="url(#bg)"/>
+  <!-- Launch platform base (darker - bottom surface) -->
+  <rect x="16" y="100" width="96" height="12" rx="2" fill="#3d3846"/>
 
-  <!-- Boot symbol (power button + gear) -->
-  <g transform="translate(64, 64)">
-    <!-- Gear -->
-    <circle cx="0" cy="0" r="24" fill="white" opacity="0.9"/>
-    <circle cx="0" cy="0" r="12" fill="url(#bg)"/>
+  <!-- Launch platform top (lighter - top surface) -->
+  <rect x="16" y="96" width="96" height="8" rx="2" fill="url(#platform)"/>
 
-    <!-- Gear teeth -->
-    <rect x="-3" y="-32" width="6" height="10" fill="white" opacity="0.9" rx="2"/>
-    <rect x="-3" y="22" width="6" height="10" fill="white" opacity="0.9" rx="2"/>
-    <rect x="-32" y="-3" width="10" height="6" fill="white" opacity="0.9" rx="2"/>
-    <rect x="22" y="-3" width="10" height="6" fill="white" opacity="0.9" rx="2"/>
+  <!-- Platform support legs -->
+  <rect x="20" y="96" width="6" height="16" rx="1" fill="#5e5c64"/>
+  <rect x="102" y="96" width="6" height="16" rx="1" fill="#5e5c64"/>
 
-    <!-- Power symbol on top -->
-    <path d="M -2,-10 L -2,-24 M 2,-10 L 2,-24"
-          stroke="white" stroke-width="3" stroke-linecap="round" fill="none"
-          transform="translate(0, -10)"/>
-    <circle cx="0" cy="-10" r="8"
-            stroke="white" stroke-width="3" fill="none"
-            stroke-dasharray="15, 5" stroke-dashoffset="2"/>
-  </g>
+  <!-- Flame exhaust (bottom layer) -->
+  <ellipse cx="64" cy="88" rx="10" ry="14" fill="url(#flame)" opacity="0.9"/>
+
+  <!-- Rocket body main (front surface - lighter) -->
+  <rect x="48" y="32" width="32" height="56" rx="3" fill="url(#rocketBody)"/>
+
+  <!-- Rocket body side (depth surface - darker) -->
+  <path d="M 48,32 L 44,36 L 44,92 L 48,88 Z" fill="#1c71d8" opacity="0.7"/>
+
+  <!-- Rocket nose cone front (lighter top surface) -->
+  <path d="M 48,32 L 64,12 L 80,32 Z" fill="url(#rocketTop)"/>
+
+  <!-- Rocket nose cone side (darker depth surface) -->
+  <path d="M 48,32 L 44,36 L 64,16 Z" fill="#3584e4" opacity="0.7"/>
+
+  <!-- Window (porthole) -->
+  <circle cx="64" cy="48" r="8" fill="#1a5fb4" opacity="0.5"/>
+  <circle cx="64" cy="48" r="6" fill="#99c1f1" opacity="0.8"/>
+  <circle cx="62" cy="46" r="2" fill="#deddda" opacity="0.9"/>
+
+  <!-- Rocket fins left (front) -->
+  <path d="M 48,68 L 48,88 L 36,88 L 40,76 Z" fill="url(#rocketTop)"/>
+  <!-- Rocket fins left (side - darker) -->
+  <path d="M 48,68 L 44,72 L 40,76 L 36,88 L 48,88 Z" fill="#1c71d8" opacity="0.7"/>
+
+  <!-- Rocket fins right (front only, visible surface) -->
+  <path d="M 80,68 L 80,88 L 92,88 L 88,76 Z" fill="url(#rocketTop)"/>
+
+  <!-- Accent stripes on rocket body -->
+  <rect x="48" y="60" width="32" height="3" rx="1" fill="#deddda" opacity="0.3"/>
+  <rect x="48" y="76" width="32" height="3" rx="1" fill="#deddda" opacity="0.3"/>
+
+  <!-- Checkmark symbol (representing management/control) -->
+  <path d="M 70,24 L 74,28 L 82,18"
+        stroke="#9141ac" stroke-width="3" stroke-linecap="round"
+        stroke-linejoin="round" fill="none" opacity="0.9"/>
+
+  <!-- Checkmark background circle -->
+  <circle cx="76" cy="22" r="9" fill="#f6f5f4" opacity="0.95"/>
+  <path d="M 70,24 L 74,28 L 82,18"
+        stroke="#9141ac" stroke-width="2.5" stroke-linecap="round"
+        stroke-linejoin="round" fill="none"/>
 </svg>
