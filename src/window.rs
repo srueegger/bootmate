@@ -1,7 +1,7 @@
 
 // SPDX-License-Identifier: GPL-2.0-only
 
-use crate::autostart::AutostartEntry;
+use crate::autostart::{AutostartEntry, SandboxType};
 use crate::entry_row::EntryRow;
 use libadwaita as adw;
 use adw::prelude::*;
@@ -20,6 +20,8 @@ mod imp {
     pub struct BootMateWindow {
         #[template_child]
         pub header_bar: TemplateChild<adw::HeaderBar>,
+        #[template_child]
+        pub sandbox_banner: TemplateChild<adw::Banner>,
         #[template_child]
         pub main_stack: TemplateChild<gtk::Stack>,
         #[template_child]
@@ -96,6 +98,9 @@ impl BootMateWindow {
 
     pub fn load_autostart_entries(&self) {
         let imp = self.imp();
+
+        // Check directory access and show warning if needed
+        self.check_sandbox_permissions();
 
         // Clear existing entries from both lists
         while let Some(child) = imp.user_list_box.first_child() {
@@ -353,5 +358,58 @@ impl BootMateWindow {
         );
 
         dialog.present(Some(self));
+    }
+
+    fn check_sandbox_permissions(&self) {
+        let imp = self.imp();
+        let access = AutostartEntry::check_directory_access();
+
+        // Check if we're missing any permissions
+        let missing_permissions = !access.user_autostart
+            || !access.etc_xdg_autostart
+            || !access.usr_share_gnome_autostart
+            || !access.usr_share_applications;
+
+        if missing_permissions && access.sandbox_type != SandboxType::None {
+            let message = match access.sandbox_type {
+                SandboxType::Snap => {
+                    let mut msg = String::from("Limited access to autostart directories. To enable full functionality, run:\n");
+
+                    if !access.user_autostart {
+                        msg.push_str("sudo snap connect bootmate:dot-config-autostart\n");
+                    }
+                    if !access.etc_xdg_autostart || !access.usr_share_gnome_autostart {
+                        msg.push_str("sudo snap connect bootmate:system-autostart-read\n");
+                    }
+                    if !access.usr_share_applications {
+                        msg.push_str("sudo snap connect bootmate:desktop-applications-read\n");
+                    }
+                    msg
+                },
+                SandboxType::Flatpak => {
+                    let mut msg = String::from("Limited access to autostart directories. To enable full functionality, run:\n");
+
+                    if !access.user_autostart {
+                        msg.push_str("flatpak override --user ch.srueegger.bootmate --filesystem=xdg-config/autostart\n");
+                    }
+                    if !access.etc_xdg_autostart {
+                        msg.push_str("flatpak override --user ch.srueegger.bootmate --filesystem=/etc/xdg/autostart:ro\n");
+                    }
+                    if !access.usr_share_gnome_autostart {
+                        msg.push_str("flatpak override --user ch.srueegger.bootmate --filesystem=/usr/share/gnome/autostart:ro\n");
+                    }
+                    if !access.usr_share_applications {
+                        msg.push_str("flatpak override --user ch.srueegger.bootmate --filesystem=/usr/share/applications:ro\n");
+                    }
+                    msg
+                },
+                SandboxType::None => String::new(),
+            };
+
+            imp.sandbox_banner.set_title(&message);
+            imp.sandbox_banner.set_revealed(true);
+        } else {
+            imp.sandbox_banner.set_revealed(false);
+        }
     }
 }

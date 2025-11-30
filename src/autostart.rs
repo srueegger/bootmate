@@ -16,6 +16,22 @@ pub struct AutostartEntry {
     pub is_user_entry: bool,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub enum SandboxType {
+    Snap,
+    Flatpak,
+    None,
+}
+
+#[derive(Debug, Clone)]
+pub struct DirectoryAccess {
+    pub user_autostart: bool,
+    pub etc_xdg_autostart: bool,
+    pub usr_share_gnome_autostart: bool,
+    pub usr_share_applications: bool,
+    pub sandbox_type: SandboxType,
+}
+
 impl AutostartEntry {
     /// Parse a .desktop file into an AutostartEntry
     pub fn from_file(path: &Path) -> Result<Self, String> {
@@ -77,6 +93,44 @@ impl AutostartEntry {
             file_path: path.to_path_buf(),
             is_user_entry,
         })
+    }
+
+    /// Detect which sandbox environment we're running in
+    fn detect_sandbox() -> SandboxType {
+        if std::env::var("SNAP").is_ok() || std::env::var("SNAP_NAME").is_ok() {
+            SandboxType::Snap
+        } else if std::env::var("FLATPAK_ID").is_ok() {
+            SandboxType::Flatpak
+        } else {
+            SandboxType::None
+        }
+    }
+
+    /// Check which autostart directories are accessible
+    pub fn check_directory_access() -> DirectoryAccess {
+        let sandbox_type = Self::detect_sandbox();
+
+        let mut access = DirectoryAccess {
+            user_autostart: false,
+            etc_xdg_autostart: false,
+            usr_share_gnome_autostart: false,
+            usr_share_applications: false,
+            sandbox_type,
+        };
+
+        // Check user autostart directory
+        if let Some(user_dir) = glib::user_config_dir().as_path().to_str() {
+            let user_autostart = PathBuf::from(user_dir).join("autostart");
+            access.user_autostart = fs::read_dir(&user_autostart).is_ok() ||
+                                   fs::create_dir_all(&user_autostart).is_ok();
+        }
+
+        // Check system directories
+        access.etc_xdg_autostart = fs::read_dir("/etc/xdg/autostart").is_ok();
+        access.usr_share_gnome_autostart = fs::read_dir("/usr/share/gnome/autostart").is_ok();
+        access.usr_share_applications = fs::read_dir("/usr/share/applications").is_ok();
+
+        access
     }
 
     /// Get all autostart entries from system and user directories

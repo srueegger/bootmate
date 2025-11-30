@@ -36,12 +36,21 @@ apps:
       - x11
       - gsettings
       - home
+      - dot-config-autostart
       - system-autostart-read
       - desktop-applications-read
     environment:
       XDG_DATA_DIRS: $SNAP/usr/share:$SNAP/usr/local/share:$XDG_DATA_DIRS
 
 plugs:
+  # Access to ~/.config/autostart for user autostart entries
+  dot-config-autostart:
+    interface: personal-files
+    write:
+      - $HOME/.config/autostart
+    read:
+      - $HOME/.config/autostart
+
   # Read-only access to system autostart directories
   system-autostart-read:
     interface: system-files
