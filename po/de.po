@@ -132,3 +132,19 @@ msgstr "Ein Autostart-Eintrag mit diesem Namen existiert bereits. Bitte wählen 
 #: src/window.rs
 msgid "OK"
 msgstr "OK"
+
+#: data/ui/window.ui:77
+msgid "User Autostart"
+msgstr "Benutzer-Autostart"
+
+#: data/ui/window.ui:86
+msgid "Applications that start automatically for your user account"
+msgstr "Anwendungen, die automatisch für Ihr Benutzerkonto starten"
+
+#: data/ui/window.ui:115
+msgid "System Autostart"
+msgstr "System-Autostart"
+
+#: data/ui/window.ui:124
+msgid "System-wide applications that start automatically"
+msgstr "Systemweite Anwendungen, die automatisch starten"
