@@ -39,6 +39,22 @@ sudo snap install bootmate
 
 The snap package includes all dependencies and works on all major Linux distributions.
 
+### Download Pre-built Packages
+
+Pre-built packages are automatically created for each release:
+
+- **Snap Package**: Download from [GitHub Releases](https://github.com/srueegger/bootmate/releases)
+- **DEB Package**: Download from [GitHub Releases](https://github.com/srueegger/bootmate/releases)
+
+```bash
+# Install snap package
+sudo snap install --dangerous bootmate_1.0.0_amd64.snap
+
+# Install deb package (Ubuntu/Debian)
+sudo dpkg -i bootmate_1.0.0_amd64.deb
+sudo apt-get install -f  # Install dependencies if needed
+```
+
 ### From Source
 
 If you prefer to build from source, see the [Building](#building) section below.

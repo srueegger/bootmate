@@ -1,0 +1,93 @@
+name: Build and Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  build-snap:
+    name: Build Snap Package
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install snapcraft
+        run: |
+          sudo snap install snapcraft --classic
+
+      - name: Build snap
+        run: |
+          snapcraft pack --destructive-mode
+
+      - name: Upload snap to release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./bootmate_1.0.0_amd64.snap
+          asset_name: bootmate_1.0.0_amd64.snap
+          asset_content_type: application/octet-stream
+
+      - name: Upload snap artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: snap-package
+          path: '*.snap'
+
+  build-deb:
+    name: Build DEB Package
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            meson \
+            cargo \
+            rustc \
+            libgtk-4-dev \
+            libadwaita-1-dev \
+            libglib2.0-dev \
+            gettext \
+            appstream-util \
+            desktop-file-utils
+
+      - name: Install cargo-deb
+        run: |
+          cargo install cargo-deb
+
+      - name: Build with meson (for resources)
+        run: |
+          meson setup build-release --prefix=/usr -Dprofile=release
+          meson compile -C build-release
+
+      - name: Build DEB package
+        run: |
+          cargo deb
+
+      - name: Upload deb to release
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./target/debian/bootmate_1.0.0_amd64.deb
+          asset_name: bootmate_1.0.0_amd64.deb
+          asset_content_type: application/vnd.debian.binary-package
+
+      - name: Upload deb artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-package
+          path: target/debian/*.deb
