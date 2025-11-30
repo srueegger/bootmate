@@ -128,11 +128,14 @@ To build a snap package for local testing or distribution:
 sudo snap install snapcraft --classic
 
 # Build the snap
-snapcraft
+# Note: Use --destructive-mode if you encounter LXD network issues
+snapcraft pack --destructive-mode
 
 # Install the locally built snap
 sudo snap install --dangerous bootmate_1.0.0_amd64.snap
 ```
+
+**Note:** The `--destructive-mode` flag builds directly on your host system instead of using an LXD container. This is useful if you encounter network issues with LXD managed instances.
 
 For publishing to the Snap Store, see [Publishing](#publishing-to-snap-store).
 
