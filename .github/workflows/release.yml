@@ -44,6 +44,16 @@ jobs:
         run: |
           snapcraft pack --destructive-mode
 
+      - name: Get version from tag
+        id: get_version
+        run: |
+          # Extract version from tag (e.g., v1.1.0 -> 1.1.0)
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          # Find the actual snap file
+          SNAP_FILE=$(ls *.snap)
+          echo "snap_file=$SNAP_FILE" >> $GITHUB_OUTPUT
+
       - name: Upload snap to release
         if: github.event_name == 'release'
         uses: actions/upload-release-asset@v1
@@ -51,8 +61,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./bootmate_1.0.0_amd64.snap
-          asset_name: bootmate_1.0.0_amd64.snap
+          asset_path: ./${{ steps.get_version.outputs.snap_file }}
+          asset_name: bootmate_${{ steps.get_version.outputs.version }}_amd64.snap
           asset_content_type: application/octet-stream
 
       - name: Upload snap artifact
@@ -110,6 +120,16 @@ jobs:
         run: |
           cargo deb
 
+      - name: Get version from tag
+        id: get_version
+        run: |
+          # Extract version from tag (e.g., v1.1.0 -> 1.1.0)
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          # Find the actual deb file
+          DEB_FILE=$(ls target/debian/*.deb | xargs -n 1 basename)
+          echo "deb_file=$DEB_FILE" >> $GITHUB_OUTPUT
+
       - name: Upload deb to release
         if: github.event_name == 'release'
         uses: actions/upload-release-asset@v1
@@ -117,8 +137,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./target/debian/bootmate_1.0.0_amd64.deb
-          asset_name: bootmate_1.0.0_amd64.deb
+          asset_path: ./target/debian/${{ steps.get_version.outputs.deb_file }}
+          asset_name: bootmate_${{ steps.get_version.outputs.version }}_amd64.deb
           asset_content_type: application/vnd.debian.binary-package
 
       - name: Upload deb artifact
