@@ -1,6 +1,6 @@
 [package]
 name = "bootmate"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2024"
 license = "GPL-2.0-only"
 authors = ["Samuel Rüegger"]
@@ -9,8 +9,8 @@ homepage = "https://github.com/srueegger/bootmate"
 repository = "https://github.com/srueegger/bootmate"
 
 [dependencies]
-gtk = { version = "0.10", package = "gtk4", features = ["v4_20"] }
-libadwaita = { version = "0.8", features = ["v1_8"] }
+gtk = { version = "0.10", package = "gtk4", features = ["v4_12"] }
+libadwaita = { version = "0.8", features = ["v1_5"] }
 gettext-rs = { version = "0.7", features = ["gettext-system"] }
 glib = "0.21"
 gio = "0.21"
