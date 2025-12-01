@@ -18,6 +18,7 @@ apps:
       - desktop-legacy
       - wayland
       - x11
+      - opengl
       - gsettings
       - home
       - dot-config-autostart
