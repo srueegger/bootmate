@@ -17,6 +17,12 @@ jobs:
       - name: Install dependencies and cross-compilation tools
         run: |
           sudo dpkg --add-architecture arm64
+
+          # Add ARM64 repositories
+          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main universe restricted multiverse" | sudo tee -a /etc/apt/sources.list
+          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-updates main universe restricted multiverse" | sudo tee -a /etc/apt/sources.list
+          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-security main universe restricted multiverse" | sudo tee -a /etc/apt/sources.list
+
           sudo apt-get update
           sudo apt-get install -y \
             build-essential \
@@ -102,6 +108,13 @@ jobs:
 
       - name: Install build dependencies
         run: |
+          sudo dpkg --add-architecture arm64
+
+          # Add ARM64 repositories
+          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main universe restricted multiverse" | sudo tee -a /etc/apt/sources.list
+          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-updates main universe restricted multiverse" | sudo tee -a /etc/apt/sources.list
+          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-security main universe restricted multiverse" | sudo tee -a /etc/apt/sources.list
+
           sudo apt-get update
           sudo apt-get install -y \
             curl \
