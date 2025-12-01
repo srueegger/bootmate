@@ -1,0 +1,130 @@
+name: Build ARM64 Packages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build-deb-arm64:
+    name: Build DEB (ARM64)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies and cross-compilation tools
+        run: |
+          sudo dpkg --add-architecture arm64
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            meson \
+            pkg-config \
+            gcc-aarch64-linux-gnu \
+            libgtk-4-dev:arm64 \
+            libadwaita-1-dev:arm64 \
+            libglib2.0-dev:arm64 \
+            libglib2.0-bin \
+            gettext \
+            desktop-file-utils \
+            appstream
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-unknown-linux-gnu
+
+      - name: Install cargo-deb
+        run: cargo install cargo-deb
+
+      - name: Build resources with meson
+        run: |
+          export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+          export PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
+          meson setup build-release --prefix=/usr -Dprofile=release --cross-file=arm64-cross.ini
+          meson compile -C build-release
+        continue-on-error: true
+
+      - name: Create meson cross file
+        run: |
+          cat > arm64-cross.ini << EOF
+          [binaries]
+          c = 'aarch64-linux-gnu-gcc'
+          cpp = 'aarch64-linux-gnu-g++'
+          ar = 'aarch64-linux-gnu-ar'
+          strip = 'aarch64-linux-gnu-strip'
+          pkgconfig = 'pkg-config'
+
+          [properties]
+          sys_root = '/usr/aarch64-linux-gnu'
+
+          [host_machine]
+          system = 'linux'
+          cpu_family = 'aarch64'
+          cpu = 'aarch64'
+          endian = 'little'
+          EOF
+
+      - name: Build resources with meson (with cross-file)
+        run: |
+          export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+          export PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
+          meson setup build-release --prefix=/usr -Dprofile=release --cross-file=arm64-cross.ini
+          meson compile -C build-release
+
+      - name: Build DEB package for ARM64
+        run: |
+          export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
+          export PKG_CONFIG_ALLOW_CROSS=1
+          export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+          cargo deb --target=aarch64-unknown-linux-gnu
+
+      - name: Upload DEB
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-arm64
+          path: target/aarch64-unknown-linux-gnu/debian/*.deb
+
+  build-snap-arm64:
+    name: Build Snap (ARM64)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU for ARM64
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            curl \
+            gcc \
+            meson \
+            ninja-build \
+            pkg-config \
+            libgtk-4-dev \
+            libadwaita-1-dev \
+            libglib2.0-dev \
+            libglib2.0-bin \
+            gettext \
+            desktop-file-utils \
+            gcc-aarch64-linux-gnu
+
+      - name: Install snapcraft
+        run: sudo snap install snapcraft --classic
+
+      - name: Build snap for ARM64
+        run: snapcraft pack --destructive-mode --build-for=arm64
+
+      - name: Upload Snap
+        uses: actions/upload-artifact@v4
+        with:
+          name: snap-arm64
+          path: '*.snap'
