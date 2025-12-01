@@ -12,7 +12,7 @@ confinement: strict
 
 apps:
   bootmate:
-    command: usr/local/bin/bootmate
+    command: usr/bin/bootmate
     plugs:
       - desktop
       - desktop-legacy
@@ -23,10 +23,19 @@ apps:
       - dot-config-autostart
       - system-autostart-read
       - desktop-applications-read
+      - dbus
+    slots:
+      - dbus-bootmate
     environment:
       XDG_DATA_DIRS: $SNAP/usr/share:$SNAP/usr/local/share:$XDG_DATA_DIRS
       GTK_USE_PORTAL: "1"
       GSETTINGS_SCHEMA_DIR: $SNAP/usr/share/glib-2.0/schemas
+
+slots:
+  dbus-bootmate:
+    interface: dbus
+    bus: session
+    name: ch.srueegger.bootmate
 
 plugs:
   dot-config-autostart:
@@ -83,6 +92,6 @@ parts:
       source $HOME/.cargo/env
 
       # Build
-      meson setup build --prefix=/usr/local -Dprofile=release
+      meson setup build --prefix=/usr -Dprofile=release
       ninja -C build
       DESTDIR=$CRAFT_PART_INSTALL ninja -C build install
