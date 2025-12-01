@@ -64,9 +64,13 @@ parts:
     build-packages:
       - rustc
       - cargo
+      - meson
+      - ninja-build
+      - pkg-config
       - libgtk-4-dev
       - libadwaita-1-dev
       - libglib2.0-dev
+      - libglib2.0-bin
       - gettext
     stage-packages:
       - libgtk-4-1
