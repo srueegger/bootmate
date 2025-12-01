@@ -87,7 +87,7 @@ parts:
       - libgraphene-1.0-0
       - libgl1
       - libgl1-mesa-dri
-      - libegl1-mesa
+      - libegl1
       - libglu1-mesa
       - mesa-vulkan-drivers
       - libvulkan1
