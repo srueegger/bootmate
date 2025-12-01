@@ -89,13 +89,18 @@ parts:
       - gsettings-desktop-schemas
       - libcanberra-gtk3-module
     override-build: |
-      # Install Rust via rustup
-      if [ ! -d "$HOME/.cargo" ]; then
+      # Install Rust via rustup if not already available
+      if ! command -v rustc &> /dev/null; then
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.85.0 --profile minimal
+        source "$HOME/.cargo/env"
       fi
 
-      # Add Rust to PATH
+      # Ensure Rust is in PATH
       export PATH="$HOME/.cargo/bin:$PATH"
+
+      # Verify Rust is available
+      rustc --version
+      cargo --version
 
       # Add target architecture for cross-compilation if needed
       SNAPCRAFT_TARGET_ARCH="${SNAPCRAFT_TARGET_ARCH:-$(dpkg --print-architecture)}"

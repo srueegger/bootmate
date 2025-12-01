@@ -63,27 +63,27 @@ If you prefer to build from source, see the [Building](#building) section below.
 
 ### Runtime Dependencies
 
-- GTK 4.10 or later
-- libadwaita 1.4 or later (1.8+ recommended for Ubuntu 25.10)
+- GTK 4.10 or later (GTK 4.12+ included in Ubuntu 24.04 LTS)
+- libadwaita 1.4 or later (libadwaita 1.4+ included in Ubuntu 24.04 LTS)
 - GLib 2.66 or later
 
 ### Build Dependencies
 
-- Rust 1.70 or later
+- Rust 1.70 or later (1.80+ recommended)
 - Meson 0.59 or later
 - Cargo
 - glib-compile-resources
 - glib-compile-schemas
 - gettext
 
-### Ubuntu 25.10
+### Ubuntu 24.04 LTS
 
-On Ubuntu 25.10, you can install all dependencies with:
+On Ubuntu 24.04 LTS, you can install all dependencies with:
 
 ```bash
 sudo apt install build-essential meson cargo rustc \
     libgtk-4-dev libadwaita-1-dev libglib2.0-dev \
-    gettext appstream-util desktop-file-utils
+    gettext appstream desktop-file-utils
 ```
 
 ## Building
@@ -256,4 +256,4 @@ See [LICENSE](LICENSE) for the full license text.
 
 - Built with [GTK 4](https://gtk.org/) and [libadwaita](https://gnome.pages.gitlab.gnome.org/libadwaita/)
 - Rust bindings by [gtk-rs](https://gtk-rs.org/)
-- Inspired by the need for autostart management in Ubuntu 25.10+
+- Designed for modern GNOME desktop environments on Ubuntu 24.04 LTS and later

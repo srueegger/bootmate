@@ -27,41 +27,14 @@ jobs:
         run: |
           sudo snap install snapcraft --classic
 
-      - name: Install ALL build dependencies
+      - name: Install snapcraft build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            build-essential \
-            gcc \
-            make \
-            meson \
-            ninja-build \
-            pkg-config \
-            libgtk-4-dev \
-            libadwaita-1-dev \
-            libglib2.0-dev \
-            glib-networking \
-            libglib2.0-bin \
-            gettext \
-            desktop-file-utils \
-            appstream \
-            libxml2-utils \
-            curl \
-            ca-certificates
-
-      - name: Install Rust via rustup (>=1.85)
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.85.0
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-
-          # Add ARM64 target if building for ARM64
+          # Snapcraft will install Rust and other build dependencies itself
+          # Only install ARM64 cross-compiler if needed (not available in snapcraft build packages)
           if [ "${{ matrix.arch }}" = "arm64" ]; then
-            $HOME/.cargo/bin/rustup target add aarch64-unknown-linux-gnu
             sudo apt-get install -y gcc-aarch64-linux-gnu
           fi
-
-          $HOME/.cargo/bin/rustc -V
-          $HOME/.cargo/bin/cargo -V
 
       - name: Build snap
         run: |
@@ -105,7 +78,7 @@ jobs:
       matrix:
         arch: [amd64, arm64]
     container:
-      image: ubuntu:25.10  # DEB needs GTK 4.20 from Ubuntu 25.10
+      image: ubuntu:24.04  # Use Ubuntu 24.04 LTS with GTK 4.12+ and libadwaita 1.4+
 
     steps:
       - name: Install git and basic tools
