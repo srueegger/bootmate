@@ -14,18 +14,32 @@ A modern GNOME application for managing autostart entries, built with Rust and l
 ## Screenshots
 
 ### Light Mode
-![Boot Mate - Light Mode](screenshots/bootmate-light.png)
-*Main window showing autostart entries in light mode*
-
-![Boot Mate - Adding Entry (Light)](screenshots/bootmate-light-add.png)
-*Adding a new autostart entry in light mode*
+<table>
+  <tr>
+    <td width="50%">
+      <img src="screenshots/bootmate-light.png" alt="Boot Mate - Light Mode">
+      <p align="center"><i>Main window showing autostart entries</i></p>
+    </td>
+    <td width="50%">
+      <img src="screenshots/bootmate-light-add.png" alt="Boot Mate - Adding Entry (Light)">
+      <p align="center"><i>Adding a new autostart entry</i></p>
+    </td>
+  </tr>
+</table>
 
 ### Dark Mode
-![Boot Mate - Dark Mode](screenshots/bootmate-dark.png)
-*Main window showing autostart entries in dark mode*
-
-![Boot Mate - Adding Entry (Dark)](screenshots/bootmate-dark-add.png)
-*Adding a new autostart entry in dark mode*
+<table>
+  <tr>
+    <td width="50%">
+      <img src="screenshots/bootmate-dark.png" alt="Boot Mate - Dark Mode">
+      <p align="center"><i>Main window showing autostart entries</i></p>
+    </td>
+    <td width="50%">
+      <img src="screenshots/bootmate-dark-add.png" alt="Boot Mate - Adding Entry (Dark)">
+      <p align="center"><i>Adding a new autostart entry</i></p>
+    </td>
+  </tr>
+</table>
 
 ## Installation
 
