@@ -83,7 +83,7 @@ impl BootMateApplication {
             .developer_name("Samuel Rüegger")
             .version(VERSION)
             .developers(vec![
-                "Samuel Rüegger",
+                "Samuel Rüegger https://rueegger.me",
                 "Actionschnitzel https://github.com/actionschnitzel",
             ])
             .license_type(gtk::License::Gpl20Only)
