@@ -25,6 +25,18 @@
   <developer_name>Samuel Rüegger</developer_name>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="1.2.0" date="2025-12-13">
+      <description>
+        <p>New features and improvements</p>
+        <ul>
+          <li>Add enable/disable toggle switches for quick control of autostart entries</li>
+          <li>Visual feedback: disabled entries appear dimmed for better clarity</li>
+          <li>Larger application icons for improved visibility</li>
+          <li>Fix markup parsing warnings for entry names with special characters</li>
+          <li>Professional README without emojis</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.1.0" date="2025-11-30">
       <description>
         <p>Improved compatibility and build system</p>
