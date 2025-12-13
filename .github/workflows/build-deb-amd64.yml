@@ -1,4 +1,4 @@
-name: Build and Release
+name: Build DEB AMD64
 
 on:
   release:
@@ -48,39 +48,3 @@ jobs:
         with:
           name: deb-amd64
           path: target/debian/*.deb
-
-  build-snap-amd64:
-    name: Build Snap (AMD64)
-    runs-on: ubuntu-24.04
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            curl \
-            gcc \
-            meson \
-            ninja-build \
-            pkg-config \
-            libgtk-4-dev \
-            libadwaita-1-dev \
-            libglib2.0-dev \
-            libglib2.0-bin \
-            gettext \
-            desktop-file-utils
-
-      - name: Install snapcraft
-        run: sudo snap install snapcraft --classic
-
-      - name: Build snap with destructive mode
-        run: snapcraft pack --destructive-mode
-
-      - name: Upload Snap
-        uses: actions/upload-artifact@v4
-        with:
-          name: snap-amd64
-          path: '*.snap'

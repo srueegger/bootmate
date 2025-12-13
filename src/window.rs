@@ -373,20 +373,6 @@ impl BootMateWindow {
         if missing_permissions && access.sandbox_type != SandboxType::None {
             let header = gettext("Limited access detected. Run these commands to enable full functionality:");
             let message = match access.sandbox_type {
-                SandboxType::Snap => {
-                    let mut msg = format!("{}\n", header);
-
-                    if !access.user_autostart {
-                        msg.push_str("sudo snap connect bootmate:dot-config-autostart\n");
-                    }
-                    if !access.etc_xdg_autostart || !access.usr_share_gnome_autostart {
-                        msg.push_str("sudo snap connect bootmate:system-autostart-read\n");
-                    }
-                    if !access.usr_share_applications {
-                        msg.push_str("sudo snap connect bootmate:desktop-applications-read\n");
-                    }
-                    msg
-                },
                 SandboxType::Flatpak => {
                     let mut msg = format!("{}\n", header);
 

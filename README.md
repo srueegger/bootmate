@@ -4,12 +4,12 @@ A modern GNOME application for managing autostart entries, built with Rust and l
 
 ## Features
 
-- 📋 View all autostart entries from user and system directories
-- ✏️ Edit autostart entry commands and parameters
-- 🗑️ Delete or disable autostart entries
-- 🌍 Multi-language support (English and German)
-- 🎨 Follows GNOME Human Interface Guidelines
-- ⚡ Fast and lightweight, built with Rust
+- View all autostart entries from user and system directories
+- Edit autostart entry commands and parameters
+- Delete or disable autostart entries
+- Multi-language support (English and German)
+- Follows GNOME Human Interface Guidelines
+- Fast and lightweight, built with Rust
 
 ## Screenshots
 
@@ -29,27 +29,13 @@ A modern GNOME application for managing autostart entries, built with Rust and l
 
 ## Installation
 
-### Snap Store (Recommended)
-
-Install Boot Mate from the Snap Store:
-
-```bash
-sudo snap install bootmate
-```
-
-The snap package includes all dependencies and works on all major Linux distributions.
-
 ### Download Pre-built Packages
 
-Pre-built packages are automatically created for each release:
+Pre-built DEB packages are automatically created for each release:
 
-- **Snap Package**: Download from [GitHub Releases](https://github.com/srueegger/bootmate/releases)
 - **DEB Package**: Download from [GitHub Releases](https://github.com/srueegger/bootmate/releases)
 
 ```bash
-# Install snap package
-sudo snap install --dangerous bootmate_1.0.0_amd64.snap
-
 # Install deb package (Ubuntu/Debian)
 sudo dpkg -i bootmate_1.0.0_amd64.deb
 sudo apt-get install -f  # Install dependencies if needed
@@ -135,26 +121,6 @@ Or from the build directory without installing:
 
 Or launch from your application menu: **Boot Mate**
 
-## Building a Snap
-
-To build a snap package for local testing or distribution:
-
-```bash
-# Install snapcraft
-sudo snap install snapcraft --classic
-
-# Build the snap
-# Note: Use --destructive-mode if you encounter LXD network issues
-snapcraft pack --destructive-mode
-
-# Install the locally built snap
-sudo snap install --dangerous bootmate_1.0.0_amd64.snap
-```
-
-**Note:** The `--destructive-mode` flag builds directly on your host system instead of using an LXD container. This is useful if you encounter network issues with LXD managed instances.
-
-For publishing to the Snap Store, see [Publishing](#publishing-to-snap-store).
-
 ## Project Structure
 
 ```
@@ -179,37 +145,6 @@ bootmate/
 └── LICENSE                # GPLv2 license
 
 ```
-
-## Publishing to Snap Store
-
-To publish Boot Mate to the Snap Store:
-
-1. **Register the snap name** (first time only):
-   ```bash
-   snapcraft login
-   snapcraft register bootmate
-   ```
-
-2. **Build the snap**:
-   ```bash
-   snapcraft
-   ```
-
-3. **Upload to the store**:
-   ```bash
-   snapcraft upload bootmate_1.0.0_amd64.snap
-   ```
-
-4. **Release to a channel**:
-   ```bash
-   # Release to stable channel
-   snapcraft release bootmate <revision> stable
-
-   # Or release to edge for testing
-   snapcraft release bootmate <revision> edge
-   ```
-
-For more information, see the [Snapcraft documentation](https://snapcraft.io/docs/releasing-your-app).
 
 ## How It Works
 
@@ -251,6 +186,10 @@ See [LICENSE](LICENSE) for the full license text.
 
 - GitHub: [@srueegger](https://github.com/srueegger)
 - Repository: [bootmate](https://github.com/srueegger/bootmate)
+
+## Contributors
+
+- **Actionschnitzel** ([@actionschnitzel](https://github.com/actionschnitzel)) - ARM64 build support
 
 ## Acknowledgments
 

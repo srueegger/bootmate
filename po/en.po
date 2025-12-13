@@ -64,6 +64,14 @@ msgid "Delete"
 msgstr "Delete"
 
 #: src/entry_row.rs
+msgid "Enabled"
+msgstr "Enabled"
+
+#: src/entry_row.rs
+msgid "Disabled"
+msgstr "Disabled"
+
+#: src/entry_row.rs
 msgid "Edit Autostart Entry"
 msgstr "Edit Autostart Entry"
 

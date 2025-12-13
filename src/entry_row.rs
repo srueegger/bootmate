@@ -40,16 +40,48 @@ impl EntryRow {
     pub fn new(entry: &AutostartEntry) -> Self {
         let row: Self = glib::Object::new();
 
-        row.set_title(&entry.name);
+        // Escape markup characters in title and subtitle to prevent parsing errors
+        row.set_title(&glib::markup_escape_text(&entry.name));
 
         // Set subtitle (exec command)
-        row.set_subtitle(&entry.exec);
+        row.set_subtitle(&glib::markup_escape_text(&entry.exec));
 
-        // Set icon
-        if let Some(icon_name) = &entry.icon {
-            row.add_prefix(&gtk::Image::from_icon_name(icon_name));
+        // Create a horizontal box for prefix (switch + icon)
+        let prefix_box = gtk::Box::new(gtk::Orientation::Horizontal, 8);
+
+        // Add enable/disable switch
+        let enable_switch = gtk::Switch::builder()
+            .active(entry.enabled)
+            .valign(gtk::Align::Center)
+            .tooltip_text(if entry.enabled {
+                gettext("Enabled")
+            } else {
+                gettext("Disabled")
+            })
+            .build();
+
+        prefix_box.append(&enable_switch);
+
+        // Set icon with larger size
+        let icon = if let Some(icon_name) = &entry.icon {
+            gtk::Image::builder()
+                .icon_name(icon_name)
+                .pixel_size(32)
+                .build()
         } else {
-            row.add_prefix(&gtk::Image::from_icon_name("application-x-executable"));
+            gtk::Image::builder()
+                .icon_name("application-x-executable")
+                .pixel_size(32)
+                .build()
+        };
+
+        prefix_box.append(&icon);
+        row.add_prefix(&prefix_box);
+
+        // Apply visual styling for disabled entries
+        if !entry.enabled {
+            row.set_opacity(0.5);
+            row.add_css_class("dim-label");
         }
 
         // Add Edit button
@@ -77,6 +109,49 @@ impl EntryRow {
 
         // Store entry data
         row.imp().entry.replace(Some(entry.clone()));
+
+        // Connect switch toggle handler
+        let entry_clone = entry.clone();
+        enable_switch.connect_state_set(glib::clone!(
+            #[weak] row,
+            #[upgrade_or] glib::Propagation::Proceed,
+            move |switch, enabled| {
+                // Update visual state immediately
+                if enabled {
+                    row.set_opacity(1.0);
+                    row.remove_css_class("dim-label");
+                    switch.set_tooltip_text(Some(&gettext("Enabled")));
+                } else {
+                    row.set_opacity(0.5);
+                    row.add_css_class("dim-label");
+                    switch.set_tooltip_text(Some(&gettext("Disabled")));
+                }
+
+                // Save the change
+                let mut modified_entry = entry_clone.clone();
+                modified_entry.enabled = enabled;
+
+                if let Err(e) = modified_entry.set_enabled(enabled) {
+                    eprintln!("Failed to set enabled state: {}", e);
+                    // Revert the switch state on error
+                    switch.set_active(!enabled);
+                    row.set_opacity(if !enabled { 1.0 } else { 0.5 });
+                    if !enabled {
+                        row.remove_css_class("dim-label");
+                    } else {
+                        row.add_css_class("dim-label");
+                    }
+                    return glib::Propagation::Stop;
+                }
+
+                // Refresh the entire list to ensure consistency
+                if let Some(window) = row.root().and_downcast::<crate::window::BootMateWindow>() {
+                    window.load_autostart_entries();
+                }
+
+                glib::Propagation::Proceed
+            }
+        ));
 
         // Connect edit button
         let entry_clone = entry.clone();
