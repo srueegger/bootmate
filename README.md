@@ -4,12 +4,12 @@ A modern GNOME application for managing autostart entries, built with Rust and l
 
 ## Features
 
-- 📋 View all autostart entries from user and system directories
-- ✏️ Edit autostart entry commands and parameters
-- 🗑️ Delete or disable autostart entries
-- 🌍 Multi-language support (English and German)
-- 🎨 Follows GNOME Human Interface Guidelines
-- ⚡ Fast and lightweight, built with Rust
+- View all autostart entries from user and system directories
+- Edit autostart entry commands and parameters
+- Delete or disable autostart entries
+- Multi-language support (English and German)
+- Follows GNOME Human Interface Guidelines
+- Fast and lightweight, built with Rust
 
 ## Screenshots
 
