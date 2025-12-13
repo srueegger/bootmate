@@ -27,11 +27,11 @@
   <releases>
     <release version="1.1.0" date="2025-11-30">
       <description>
-        <p>Improved Snap compatibility</p>
+        <p>Improved compatibility and build system</p>
         <ul>
           <li>Lower GTK requirement to 4.12 for broader compatibility</li>
           <li>Requires libadwaita 1.5 (available in Ubuntu 24.04)</li>
-          <li>Snap package now works on Ubuntu 24.04 (core24)</li>
+          <li>Removed Snap packaging in favor of DEB packages</li>
           <li>Fixed GitHub Actions automated builds</li>
         </ul>
       </description>

@@ -30,9 +30,3 @@ src/*.gresource
 *.o
 *.so
 *.a
-
-# Snap
-/parts
-/prime
-/stage
-/*.snap

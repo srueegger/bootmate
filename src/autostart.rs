@@ -18,7 +18,6 @@ pub struct AutostartEntry {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum SandboxType {
-    Snap,
     Flatpak,
     None,
 }
@@ -97,9 +96,7 @@ impl AutostartEntry {
 
     /// Detect which sandbox environment we're running in
     fn detect_sandbox() -> SandboxType {
-        if std::env::var("SNAP").is_ok() || std::env::var("SNAP_NAME").is_ok() {
-            SandboxType::Snap
-        } else if std::env::var("FLATPAK_ID").is_ok() {
+        if std::env::var("FLATPAK_ID").is_ok() {
             SandboxType::Flatpak
         } else {
             SandboxType::None
