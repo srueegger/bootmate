@@ -207,6 +207,34 @@ impl AutostartEntry {
         Ok(())
     }
 
+    /// Helper method to write a desktop file with all fields
+    fn write_desktop_file(&self, exec: &str, enabled: bool, path: &Path) -> Result<(), String> {
+        let mut content = String::from("[Desktop Entry]\n");
+        content.push_str("Type=Application\n");
+        content.push_str(&format!("Name={}\n", self.name));
+        content.push_str(&format!("Exec={}\n", exec));
+        content.push_str("Terminal=false\n");
+
+        if let Some(icon) = &self.icon {
+            content.push_str(&format!("Icon={}\n", icon));
+        }
+
+        if let Some(comment) = &self.comment {
+            content.push_str(&format!("Comment={}\n", comment));
+        }
+
+        if enabled {
+            content.push_str("X-GNOME-Autostart-enabled=true\n");
+        } else {
+            content.push_str("X-GNOME-Autostart-enabled=false\n");
+        }
+
+        fs::write(path, content)
+            .map_err(|e| format!("Failed to write file: {}", e))?;
+
+        Ok(())
+    }
+
     /// Save changes to this entry
     pub fn save(&self, new_exec: &str) -> Result<(), String> {
         let user_dir = glib::user_config_dir();
@@ -219,29 +247,21 @@ impl AutostartEntry {
             .ok_or("Invalid file name")?;
         let user_file = user_autostart.join(filename);
 
-        let mut content = String::from("[Desktop Entry]\n");
-        content.push_str("Type=Application\n");
-        content.push_str(&format!("Name={}\n", self.name));
-        content.push_str(&format!("Exec={}\n", new_exec));
-        content.push_str("Terminal=false\n");
+        self.write_desktop_file(new_exec, self.enabled, &user_file)
+    }
 
-        if let Some(icon) = &self.icon {
-            content.push_str(&format!("Icon={}\n", icon));
-        }
+    /// Set the enabled state of this entry
+    pub fn set_enabled(&self, enabled: bool) -> Result<(), String> {
+        let user_dir = glib::user_config_dir();
+        let user_autostart = user_dir.join("autostart");
 
-        if let Some(comment) = &self.comment {
-            content.push_str(&format!("Comment={}\n", comment));
-        }
+        fs::create_dir_all(&user_autostart)
+            .map_err(|e| format!("Failed to create autostart directory: {}", e))?;
 
-        if self.enabled {
-            content.push_str("X-GNOME-Autostart-enabled=true\n");
-        } else {
-            content.push_str("X-GNOME-Autostart-enabled=false\n");
-        }
+        let filename = self.file_path.file_name()
+            .ok_or("Invalid file name")?;
+        let user_file = user_autostart.join(filename);
 
-        fs::write(&user_file, content)
-            .map_err(|e| format!("Failed to save file: {}", e))?;
-
-        Ok(())
+        self.write_desktop_file(&self.exec, enabled, &user_file)
     }
 }
