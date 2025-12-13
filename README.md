@@ -187,6 +187,10 @@ See [LICENSE](LICENSE) for the full license text.
 - GitHub: [@srueegger](https://github.com/srueegger)
 - Repository: [bootmate](https://github.com/srueegger/bootmate)
 
+## Contributors
+
+- **Actionschnitzel** ([@actionschnitzel](https://github.com/actionschnitzel)) - ARM64 build support
+
 ## Acknowledgments
 
 - Built with [GTK 4](https://gtk.org/) and [libadwaita](https://gnome.pages.gitlab.gnome.org/libadwaita/)

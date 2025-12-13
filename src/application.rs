@@ -82,7 +82,10 @@ impl BootMateApplication {
             .application_icon("ch.srueegger.bootmate")
             .developer_name("Samuel Rüegger")
             .version(VERSION)
-            .developers(vec!["Samuel Rüegger"])
+            .developers(vec![
+                "Samuel Rüegger",
+                "Actionschnitzel https://github.com/actionschnitzel",
+            ])
             .license_type(gtk::License::Gpl20Only)
             .comments(gettext("Manage autostart entries"))
             .website("https://github.com/srueegger/bootmate")
