@@ -47,7 +47,7 @@ impl EntryRow {
         row.set_subtitle(&glib::markup_escape_text(&entry.exec));
 
         // Create a horizontal box for prefix (switch + icon)
-        let prefix_box = gtk::Box::new(gtk::Orientation::Horizontal, 12);
+        let prefix_box = gtk::Box::new(gtk::Orientation::Horizontal, 8);
 
         // Add enable/disable switch
         let enable_switch = gtk::Switch::builder()
@@ -62,11 +62,17 @@ impl EntryRow {
 
         prefix_box.append(&enable_switch);
 
-        // Set icon
+        // Set icon with larger size
         let icon = if let Some(icon_name) = &entry.icon {
-            gtk::Image::from_icon_name(icon_name)
+            gtk::Image::builder()
+                .icon_name(icon_name)
+                .pixel_size(32)
+                .build()
         } else {
-            gtk::Image::from_icon_name("application-x-executable")
+            gtk::Image::builder()
+                .icon_name("application-x-executable")
+                .pixel_size(32)
+                .build()
         };
 
         prefix_box.append(&icon);
