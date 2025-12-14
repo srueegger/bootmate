@@ -6,6 +6,10 @@ Cargo.lock
 /build
 /builddir
 /_build
+/build-release
+
+# PPA build directory
+/ppa
 
 # GResource compiled files
 *.gresource

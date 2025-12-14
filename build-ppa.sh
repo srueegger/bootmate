@@ -49,6 +49,14 @@ fi
 echo "✓ All required tools found"
 echo ""
 
+# Create and setup PPA build directory
+echo "Setting up PPA build directory..."
+rm -rf ppa
+mkdir -p ppa
+cd ppa
+echo "✓ Created ppa/ directory"
+echo ""
+
 # Check if dput is configured
 if [ ! -f ~/.dput.cf ]; then
     echo "WARNING: ~/.dput.cf not found!"
@@ -65,21 +73,26 @@ EOF
     echo ""
 fi
 
-# Clean previous builds and build artifacts
-echo "Cleaning previous builds and build artifacts..."
-rm -f ../*.deb ../*.dsc ../*.changes ../*.buildinfo ../*.tar.* ../*.upload
-rm -rf target/ build/ builddir/ _build/
+# Clean any previous build artifacts in ppa directory
+echo "Cleaning previous builds..."
+rm -f *.deb *.dsc *.changes *.buildinfo *.tar.* *.upload
 echo "✓ Cleaned"
 echo ""
 
 # Create orig.tar.xz from git
 echo "Creating orig.tar.xz from git repository..."
-git archive --format=tar --prefix=bootmate-${VERSION}/ HEAD | xz > ../bootmate_${VERSION}.orig.tar.xz
+git archive --format=tar --prefix=bootmate-${VERSION}/ HEAD | xz > bootmate_${VERSION}.orig.tar.xz
 if [ $? -ne 0 ]; then
     echo "ERROR: Failed to create orig.tar.xz"
     exit 1
 fi
-echo "✓ Created ../bootmate_${VERSION}.orig.tar.xz"
+echo "✓ Created ppa/bootmate_${VERSION}.orig.tar.xz"
+echo ""
+
+# Extract the source tree for building
+echo "Extracting source tree..."
+tar -xf bootmate_${VERSION}.orig.tar.xz
+echo "✓ Extracted"
 echo ""
 
 # Build for each release
@@ -90,6 +103,15 @@ for i in "${!RELEASES[@]}"; do
     echo "================================================"
     echo "Building for Ubuntu ${RELEASE_NAME} (${RELEASE})"
     echo "================================================"
+
+    # Create a fresh extract for this release
+    rm -rf bootmate-${VERSION}
+    tar -xf bootmate_${VERSION}.orig.tar.xz
+
+    # Copy debian directory into the extracted source
+    echo "Copying debian directory..."
+    cp -r ../debian bootmate-${VERSION}/
+    cd bootmate-${VERSION}
 
     # Update changelog for this release
     export DEBFULLNAME="Samuel Rüegger"
@@ -107,6 +129,9 @@ for i in "${!RELEASES[@]}"; do
         exit 1
     fi
 
+    # Move back to ppa directory
+    cd ..
+
     echo "✓ Source package built for ${RELEASE}"
     echo ""
 done
@@ -116,17 +141,17 @@ echo "Build Complete!"
 echo "================================================"
 echo ""
 echo "Generated source packages:"
-ls -lh ../*.changes
+ls -lh *.changes
 echo ""
 echo "Next steps:"
 echo "1. Review the changes files above"
-echo "2. Upload to PPA:"
+echo "2. Upload to PPA (from the ppa/ directory):"
 echo ""
 for RELEASE in "${RELEASES[@]}"; do
-    echo "   dput ppa:rueegger/bootmate ../bootmate_${VERSION}-0ubuntu1~${RELEASE}1_source.changes"
+    echo "   dput ppa:rueegger/bootmate bootmate_${VERSION}-0ubuntu1~${RELEASE}1_source.changes"
 done
 echo ""
 echo "Or upload all at once:"
-echo "   for file in ../bootmate_${VERSION}-*.changes; do dput ppa:rueegger/bootmate \$file; done"
+echo "   cd ppa && for file in bootmate_${VERSION}-*.changes; do dput ppa:rueegger/bootmate \$file; done"
 echo ""
 echo "3. Monitor builds at: https://launchpad.net/~rueegger/+archive/ubuntu/bootmate/+packages"
