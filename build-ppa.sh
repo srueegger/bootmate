@@ -71,6 +71,16 @@ rm -f ../*.deb ../*.dsc ../*.changes ../*.buildinfo ../*.tar.* ../*.upload
 echo "✓ Cleaned"
 echo ""
 
+# Create orig.tar.xz from git
+echo "Creating orig.tar.xz from git repository..."
+git archive --format=tar --prefix=bootmate-${VERSION}/ HEAD | xz > ../bootmate_${VERSION}.orig.tar.xz
+if [ $? -ne 0 ]; then
+    echo "ERROR: Failed to create orig.tar.xz"
+    exit 1
+fi
+echo "✓ Created ../bootmate_${VERSION}.orig.tar.xz"
+echo ""
+
 # Build for each release
 for i in "${!RELEASES[@]}"; do
     RELEASE="${RELEASES[$i]}"
