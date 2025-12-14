@@ -1,0 +1,10 @@
+bootmate (1.2.0-0ubuntu1~noble1) noble; urgency=medium
+
+  * New upstream release 1.2.0
+  * Add enable/disable toggle switches for autostart entries
+  * Visual feedback for disabled entries
+  * Larger application icons
+  * Fix markup parsing warnings
+  * Professional README
+
+ -- Samuel Rüegger <samuel@rueegger.me>  Fri, 13 Dec 2025 22:30:00 +0100

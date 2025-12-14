@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export CARGO_HOME = $(CURDIR)/debian/cargo
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	meson setup build --prefix=/usr --buildtype=release
+
+override_dh_auto_build:
+	meson compile -C build
+
+override_dh_auto_install:
+	DESTDIR=$(CURDIR)/debian/bootmate meson install -C build
+
+override_dh_auto_clean:
+	rm -rf build debian/cargo
+
+override_dh_auto_test:
+	# Skip tests for now

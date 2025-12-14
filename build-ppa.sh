@@ -1,0 +1,117 @@
+#!/bin/bash
+# Script to build and upload Boot Mate to Launchpad PPA
+
+set -e
+
+VERSION="1.2.0"
+MAINTAINER="Samuel Rüegger <samuel@rueegger.me>"
+PPA="ppa:rueegger/bootmate"
+
+# Ubuntu releases to build for
+RELEASES=("noble" "oracular" "plucky")
+RELEASE_NAMES=("24.04 LTS" "25.10 STS" "26.04 (dev)")
+
+echo "================================================"
+echo "Boot Mate PPA Build Script"
+echo "================================================"
+echo "Version: $VERSION"
+echo "PPA: $PPA"
+echo "Releases: ${RELEASES[@]}"
+echo "================================================"
+echo ""
+
+# Check for required tools
+echo "Checking required tools..."
+MISSING_TOOLS=()
+
+if ! command -v debuild &> /dev/null; then
+    MISSING_TOOLS+=("devscripts")
+fi
+
+if ! command -v dput &> /dev/null; then
+    MISSING_TOOLS+=("dput")
+fi
+
+if ! command -v dch &> /dev/null; then
+    MISSING_TOOLS+=("devscripts")
+fi
+
+if [ ${#MISSING_TOOLS[@]} -gt 0 ]; then
+    echo "ERROR: Missing required tools!"
+    echo "Please install: sudo apt install ${MISSING_TOOLS[@]}"
+    exit 1
+fi
+
+echo "✓ All required tools found"
+echo ""
+
+# Check if dput is configured
+if [ ! -f ~/.dput.cf ]; then
+    echo "WARNING: ~/.dput.cf not found!"
+    echo "Creating dput configuration..."
+    cat > ~/.dput.cf <<EOF
+[bootmate-ppa]
+fqdn = ppa.launchpad.net
+method = ftp
+incoming = ~rueegger/ubuntu/bootmate/
+login = anonymous
+allow_unsigned_uploads = 0
+EOF
+    echo "✓ Created ~/.dput.cf"
+    echo ""
+fi
+
+# Clean previous builds
+echo "Cleaning previous builds..."
+rm -f ../*.deb ../*.dsc ../*.changes ../*.buildinfo ../*.tar.* ../*.upload
+echo "✓ Cleaned"
+echo ""
+
+# Build for each release
+for i in "${!RELEASES[@]}"; do
+    RELEASE="${RELEASES[$i]}"
+    RELEASE_NAME="${RELEASE_NAMES[$i]}"
+
+    echo "================================================"
+    echo "Building for Ubuntu ${RELEASE_NAME} (${RELEASE})"
+    echo "================================================"
+
+    # Update changelog for this release
+    export DEBFULLNAME="Samuel Rüegger"
+    export DEBEMAIL="samuel@rueegger.me"
+
+    # Create changelog entry for this release
+    dch -v "${VERSION}-0ubuntu1~${RELEASE}1" -D "${RELEASE}" "New upstream release ${VERSION}" 2>/dev/null || true
+
+    # Build source package
+    echo "Building source package..."
+    debuild -S -sa -d
+
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to build source package for ${RELEASE}"
+        exit 1
+    fi
+
+    echo "✓ Source package built for ${RELEASE}"
+    echo ""
+done
+
+echo "================================================"
+echo "Build Complete!"
+echo "================================================"
+echo ""
+echo "Generated source packages:"
+ls -lh ../*.changes
+echo ""
+echo "Next steps:"
+echo "1. Review the changes files above"
+echo "2. Upload to PPA:"
+echo ""
+for RELEASE in "${RELEASES[@]}"; do
+    echo "   dput bootmate-ppa ../bootmate_${VERSION}-0ubuntu1~${RELEASE}1_source.changes"
+done
+echo ""
+echo "Or upload all at once:"
+echo "   for file in ../bootmate_${VERSION}-*.changes; do dput bootmate-ppa \$file; done"
+echo ""
+echo "3. Monitor builds at: https://launchpad.net/~rueegger/+archive/ubuntu/bootmate/+packages"

@@ -1,0 +1,39 @@
+Source: bootmate
+Section: utils
+Priority: optional
+Maintainer: Samuel Rüegger <samuel@rueegger.me>
+Build-Depends: debhelper-compat (= 13),
+               meson (>= 0.59.0),
+               cargo,
+               rustc (>= 1.70),
+               libgtk-4-dev (>= 4.12),
+               libadwaita-1-dev (>= 1.5),
+               libglib2.0-dev (>= 2.66),
+               gettext,
+               desktop-file-utils,
+               appstream
+Standards-Version: 4.6.2
+Homepage: https://github.com/srueegger/bootmate
+Vcs-Git: https://github.com/srueegger/bootmate.git
+Vcs-Browser: https://github.com/srueegger/bootmate
+Rules-Requires-Root: no
+
+Package: bootmate
+Architecture: amd64 arm64 armhf
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Manage autostart entries
+ Boot Mate provides a simple and intuitive interface to manage your
+ system's autostart entries. You can view all autostart applications,
+ edit their properties, add startup parameters, or remove them entirely.
+ .
+ Perfect for managing which applications start automatically when you
+ log in to your GNOME session.
+ .
+ Features:
+  * View all autostart entries from user and system directories
+  * Enable/disable autostart entries with toggle switches
+  * Edit autostart entry commands and parameters
+  * Delete autostart entries
+  * Add new autostart entries from installed applications or custom commands
+  * Multi-language support (English and German)
+  * Modern GNOME interface with libadwaita
