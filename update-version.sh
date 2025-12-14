@@ -45,6 +45,21 @@ sed -i "0,/<release version=\"[0-9]\+\.[0-9]\+\.[0-9]\+\"/s/<release version=\"[
 echo "  - RELEASE.md"
 sed -i "s/\*\*Aktuelle Version:\*\* [0-9]\+\.[0-9]\+\.[0-9]\+/**Aktuelle Version:** $NEW_VERSION/" RELEASE.md
 
+# Update PPA files (if they exist)
+if [ -f "build-ppa.sh" ]; then
+    echo "  - build-ppa.sh"
+    sed -i "s/^VERSION=\"[0-9]\+\.[0-9]\+\.[0-9]\+\"/VERSION=\"$NEW_VERSION\"/" build-ppa.sh
+fi
+
+if [ -f "debian/changelog" ]; then
+    echo "  - debian/changelog"
+    # Update only the first line (newest version) in debian/changelog
+    # Format: bootmate (VERSION-0ubuntu1~noble1) noble; urgency=medium
+    sed -i "1s/bootmate ([0-9]\+\.[0-9]\+\.[0-9]\+-/bootmate ($NEW_VERSION-/" debian/changelog
+    # Update date on line with the maintainer
+    sed -i "0,/ -- /s/ -- \(.*\)  .*/ -- \1  $(date -R)/" debian/changelog
+fi
+
 echo ""
 echo "Version updated to $NEW_VERSION successfully!"
 echo ""
@@ -55,6 +70,12 @@ echo "  - po/en.po"
 echo "  - po/de.po"
 echo "  - data/ch.srueegger.bootmate.metainfo.xml.in (version and date)"
 echo "  - RELEASE.md"
+if [ -f "build-ppa.sh" ]; then
+    echo "  - build-ppa.sh"
+fi
+if [ -f "debian/changelog" ]; then
+    echo "  - debian/changelog (version and timestamp)"
+fi
 echo ""
 echo "Next steps:"
 echo "  1. Review changes: git diff"
