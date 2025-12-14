@@ -49,14 +49,6 @@ fi
 echo "✓ All required tools found"
 echo ""
 
-# Create and setup PPA build directory
-echo "Setting up PPA build directory..."
-rm -rf ppa
-mkdir -p ppa
-cd ppa
-echo "✓ Created ppa/ directory"
-echo ""
-
 # Check if dput is configured
 if [ ! -f ~/.dput.cf ]; then
     echo "WARNING: ~/.dput.cf not found!"
@@ -73,20 +65,23 @@ EOF
     echo ""
 fi
 
-# Clean any previous build artifacts in ppa directory
-echo "Cleaning previous builds..."
-rm -f *.deb *.dsc *.changes *.buildinfo *.tar.* *.upload
-echo "✓ Cleaned"
-echo ""
-
-# Create orig.tar.xz from git
+# Create orig.tar.xz from git BEFORE changing directory
 echo "Creating orig.tar.xz from git repository..."
 git archive --format=tar --prefix=bootmate-${VERSION}/ HEAD | xz > bootmate_${VERSION}.orig.tar.xz
 if [ $? -ne 0 ]; then
     echo "ERROR: Failed to create orig.tar.xz"
     exit 1
 fi
-echo "✓ Created ppa/bootmate_${VERSION}.orig.tar.xz"
+echo "✓ Created bootmate_${VERSION}.orig.tar.xz"
+echo ""
+
+# Create and setup PPA build directory
+echo "Setting up PPA build directory..."
+rm -rf ppa
+mkdir -p ppa
+mv bootmate_${VERSION}.orig.tar.xz ppa/
+cd ppa
+echo "✓ Created ppa/ directory and moved tarball"
 echo ""
 
 # Extract the source tree for building
