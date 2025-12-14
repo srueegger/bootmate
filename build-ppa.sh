@@ -112,10 +112,10 @@ echo "1. Review the changes files above"
 echo "2. Upload to PPA:"
 echo ""
 for RELEASE in "${RELEASES[@]}"; do
-    echo "   dput bootmate-ppa ../bootmate_${VERSION}-0ubuntu1~${RELEASE}1_source.changes"
+    echo "   dput ppa:rueegger/bootmate ../bootmate_${VERSION}-0ubuntu1~${RELEASE}1_source.changes"
 done
 echo ""
 echo "Or upload all at once:"
-echo "   for file in ../bootmate_${VERSION}-*.changes; do dput bootmate-ppa \$file; done"
+echo "   for file in ../bootmate_${VERSION}-*.changes; do dput ppa:rueegger/bootmat \$file; done"
 echo ""
 echo "3. Monitor builds at: https://launchpad.net/~rueegger/+archive/ubuntu/bootmate/+packages"
