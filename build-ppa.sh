@@ -116,6 +116,6 @@ for RELEASE in "${RELEASES[@]}"; do
 done
 echo ""
 echo "Or upload all at once:"
-echo "   for file in ../bootmate_${VERSION}-*.changes; do dput ppa:rueegger/bootmat \$file; done"
+echo "   for file in ../bootmate_${VERSION}-*.changes; do dput ppa:rueegger/bootmate \$file; done"
 echo ""
 echo "3. Monitor builds at: https://launchpad.net/~rueegger/+archive/ubuntu/bootmate/+packages"
