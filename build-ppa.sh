@@ -65,9 +65,10 @@ EOF
     echo ""
 fi
 
-# Clean previous builds
-echo "Cleaning previous builds..."
+# Clean previous builds and build artifacts
+echo "Cleaning previous builds and build artifacts..."
 rm -f ../*.deb ../*.dsc ../*.changes ../*.buildinfo ../*.tar.* ../*.upload
+rm -rf target/ build/ builddir/ _build/
 echo "✓ Cleaned"
 echo ""
 
