@@ -24,16 +24,12 @@ echo ""
 echo "Checking required tools..."
 MISSING_TOOLS=()
 
-if ! command -v debuild &> /dev/null; then
+if ! command -v debuild &> /dev/null || ! command -v dch &> /dev/null; then
     MISSING_TOOLS+=("devscripts")
 fi
 
 if ! command -v dput &> /dev/null; then
     MISSING_TOOLS+=("dput")
-fi
-
-if ! command -v dch &> /dev/null; then
-    MISSING_TOOLS+=("devscripts")
 fi
 
 if [ ${#MISSING_TOOLS[@]} -gt 0 ]; then
