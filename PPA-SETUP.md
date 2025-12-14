@@ -41,6 +41,35 @@ Ein PPA ist ein Repository auf Launchpad, das:
 
 ---
 
+## Projektstruktur
+
+```
+bootmate/
+├── debian/                    # Debian-Paket-Konfiguration (im Git)
+│   ├── changelog
+│   ├── control
+│   ├── copyright
+│   ├── rules
+│   └── source/
+│       └── format
+├── build-ppa.sh              # Automatisiertes Build-Script (im Git)
+├── ppa/                      # Build-Verzeichnis (gitignored!)
+│   ├── bootmate_1.2.0.orig.tar.xz
+│   ├── bootmate-1.2.0/       # Extrahierter Source
+│   ├── *.dsc                 # Package descriptions
+│   ├── *.changes             # Upload-Dateien
+│   └── *.buildinfo           # Build-Informationen
+└── .gitignore                # ppa/ ist hier drin!
+```
+
+**Wichtig:**
+- Das `debian/` Verzeichnis ist Teil des Git-Repositories
+- Das `ppa/` Verzeichnis wird von `build-ppa.sh` erstellt und ist in `.gitignore`
+- Alle Build-Artefakte landen in `ppa/`, nicht im Hauptverzeichnis
+- So bleibt das Git-Repository sauber und frei von Build-Artefakten
+
+---
+
 ## Was wir erstellen müssen
 
 ### 1. debian/ Verzeichnis-Struktur
@@ -48,13 +77,14 @@ Ein PPA ist ein Repository auf Launchpad, das:
 ```
 debian/
 ├── changelog          # Versionshistorie für jede Ubuntu-Version
-├── control            # Paket-Metadaten, Dependencies
+├── control            # Paket-Metadaten, Dependencies (inkl. debhelper-compat)
 ├── rules              # Build-Anweisungen (Meson)
 ├── copyright          # Lizenz-Information
-├── source/
-│   └── format         # Source-Paket-Format (3.0 quilt)
-└── compat             # debhelper Kompatibilität
+└── source/
+    └── format         # Source-Paket-Format (3.0 quilt)
 ```
+
+**Hinweis:** `debian/compat` wird nicht mehr benötigt - die debhelper-Version wird über `debhelper-compat (= 13)` in `debian/control` definiert.
 
 ### 2. debian/control
 
@@ -118,31 +148,57 @@ Alle benötigten Dateien im `debian/` Verzeichnis erstellen.
 sudo apt install devscripts debhelper dput gnupg dpkg-dev
 ```
 
-### Schritt 3: Source-Paket bauen
+### Schritt 3: Build-Umgebung vorbereiten
+
+```bash
+# Build-Verzeichnis erstellen
+mkdir -p ppa
+cd ppa
+
+# Source-Tarball aus Git erstellen
+git archive --format=tar --prefix=bootmate-1.2.0/ HEAD | xz > bootmate_1.2.0.orig.tar.xz
+
+# Source extrahieren
+tar -xf bootmate_1.2.0.orig.tar.xz
+
+# debian/ Verzeichnis in extrahierten Source kopieren
+cp -r ../debian bootmate-1.2.0/
+cd bootmate-1.2.0
+```
+
+### Schritt 4: Source-Pakete bauen
 
 Für **jede Ubuntu-Version** separat:
 
 ```bash
 # Für Noble (24.04)
+dch -v 1.2.0-0ubuntu1~noble1 -D noble "New upstream release"
 debuild -S -sa -d
 
-# Changelog für Oracular anpassen
+# Für nächste Version: Neu extrahieren und debian/ kopieren
+cd ..
+rm -rf bootmate-1.2.0
+tar -xf bootmate_1.2.0.orig.tar.xz
+cp -r ../debian bootmate-1.2.0/
+cd bootmate-1.2.0
+
+# Für Oracular (25.10)
 dch -v 1.2.0-0ubuntu1~oracular1 -D oracular "New upstream release"
 debuild -S -sa -d
 
-# Changelog für Plucky anpassen
-dch -v 1.2.0-0ubuntu1~plucky1 -D plucky "New upstream release"
-debuild -S -sa -d
+# Gleiches für Plucky...
 ```
 
-**Output:**
+**Output (im ppa/ Verzeichnis):**
 - `bootmate_1.2.0-0ubuntu1~noble1.dsc` (Package description)
 - `bootmate_1.2.0.orig.tar.xz` (Original source)
 - `bootmate_1.2.0-0ubuntu1~noble1.debian.tar.xz` (Debian files)
 - `bootmate_1.2.0-0ubuntu1~noble1_source.changes` (Upload instructions)
 - `bootmate_1.2.0-0ubuntu1~noble1_source.buildinfo` (Build info)
 
-### Schritt 4: dput konfigurieren
+**Hinweis:** Dieser manuelle Prozess ist komplex. Nutze stattdessen `./build-ppa.sh`, welches alles automatisch macht!
+
+### Schritt 5: dput konfigurieren
 
 `~/.dput.cf` erstellen:
 ```ini
@@ -154,20 +210,19 @@ login = anonymous
 allow_unsigned_uploads = 0
 ```
 
-### Schritt 5: Zu Launchpad hochladen
+### Schritt 6: Zu Launchpad hochladen
 
 ```bash
-# Noble
-dput bootmate-ppa bootmate_1.2.0-0ubuntu1~noble1_source.changes
+# Ins ppa/ Verzeichnis wechseln
+cd ppa
 
-# Oracular
-dput bootmate-ppa bootmate_1.2.0-0ubuntu1~oracular1_source.changes
-
-# Plucky
-dput bootmate-ppa bootmate_1.2.0-0ubuntu1~plucky1_source.changes
+# Hochladen
+dput ppa:rueegger/bootmate bootmate_1.2.0-0ubuntu1~noble1_source.changes
+dput ppa:rueegger/bootmate bootmate_1.2.0-0ubuntu1~oracular1_source.changes
+dput ppa:rueegger/bootmate bootmate_1.2.0-0ubuntu1~plucky1_source.changes
 ```
 
-### Schritt 6: Launchpad baut automatisch
+### Schritt 7: Launchpad baut automatisch
 
 Launchpad wird dann:
 1. Source-Paket entpacken
@@ -230,8 +285,11 @@ sudo apt install bootmate
 ## Troubleshooting
 
 ### "dpkg-source: error: unrepresentable changes to source"
-→ Nicht-commitete Änderungen im Source-Tree
-→ Lösung: `git clean -fdx` oder alle Änderungen committen
+→ Build-Artefakte (wie `.gresource`, `.rlib`, `.so`) oder IDE-Dateien im Source-Tree
+→ Lösung:
+  - Automatisch: `./build-ppa.sh` nutzt sauberen Git-Export
+  - Manuell: Stelle sicher, dass du aus dem extrahierten Tarball baust, nicht aus dem Git-Repository
+  - `ppa/` Verzeichnis ist in `.gitignore` und bleibt sauber
 
 ### "gpg: signing failed: No such file or directory"
 → GPG-Schlüssel nicht gefunden
@@ -244,6 +302,10 @@ sudo apt install bootmate
 ### Build schlägt fehl auf Launchpad
 → Dependencies fehlen oder falsche Versionen
 → Lösung: `debian/control` Build-Dependencies prüfen
+
+### Binäre Dateien im ppa/ Verzeichnis
+→ Normal! Das `ppa/` Verzeichnis enthält Build-Artefakte
+→ Lösung: `ppa/` ist in `.gitignore`, einfach ignorieren oder mit `rm -rf ppa/` löschen
 
 ---
 
@@ -278,24 +340,38 @@ sudo apt install devscripts debhelper dput gnupg dpkg-dev
 
 Das Script wird:
 - ✓ Alle benötigten Tools prüfen
-- ✓ ~/.dput.cf konfigurieren
+- ✓ `ppa/` Verzeichnis erstellen (gitignored)
+- ✓ `~/.dput.cf` konfigurieren
+- ✓ Source-Tarball aus Git erstellen
 - ✓ Source-Pakete für Noble, Oracular und Plucky bauen
 - ✓ Changelog für jede Version aktualisieren
+- ✓ Alle Build-Artefakte in `ppa/` ablegen
+
+**Wichtig:** Alle Build-Artefakte landen im `ppa/` Verzeichnis, welches in `.gitignore` ist. So bleibt dein Git-Repository sauber!
 
 ### Schritt 3: Zu Launchpad hochladen
 
 Nach dem Build zeigt das Script die Upload-Befehle:
 
 ```bash
-# Alle auf einmal hochladen
-for file in ../bootmate_1.2.0-*.changes; do dput bootmate-ppa $file; done
+# Alle auf einmal hochladen (empfohlen)
+cd ppa && for file in bootmate_1.2.0-*.changes; do dput ppa:rueegger/bootmate $file; done
+```
+
+Oder einzeln:
+
+```bash
+cd ppa
+dput ppa:rueegger/bootmate bootmate_1.2.0-0ubuntu1~noble1_source.changes
+dput ppa:rueegger/bootmate bootmate_1.2.0-0ubuntu1~oracular1_source.changes
+dput ppa:rueegger/bootmate bootmate_1.2.0-0ubuntu1~plucky1_source.changes
 ```
 
 ### Schritt 4: Builds beobachten
 
 https://launchpad.net/~rueegger/+archive/ubuntu/bootmate/+packages
 
-Fertig! 🎉
+Fertig!
 
 ---
 
