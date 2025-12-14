@@ -32,6 +32,14 @@ if ! command -v dput &> /dev/null; then
     MISSING_TOOLS+=("dput")
 fi
 
+if ! command -v dh &> /dev/null; then
+    MISSING_TOOLS+=("debhelper")
+fi
+
+if ! command -v dpkg-buildpackage &> /dev/null; then
+    MISSING_TOOLS+=("dpkg-dev")
+fi
+
 if [ ${#MISSING_TOOLS[@]} -gt 0 ]; then
     echo "ERROR: Missing required tools!"
     echo "Please install: sudo apt install ${MISSING_TOOLS[@]}"

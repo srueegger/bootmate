@@ -115,7 +115,7 @@ Alle benötigten Dateien im `debian/` Verzeichnis erstellen.
 
 ### Schritt 2: Tools installieren
 ```bash
-sudo apt install devscripts debhelper dput gnupg
+sudo apt install devscripts debhelper dput gnupg dpkg-dev
 ```
 
 ### Schritt 3: Source-Paket bauen
@@ -267,7 +267,7 @@ Wir haben ein automatisiertes Script erstellt, das alles für dich macht!
 ### Schritt 1: Tools installieren
 
 ```bash
-sudo apt install devscripts debhelper dput gnupg
+sudo apt install devscripts debhelper dput gnupg dpkg-dev
 ```
 
 ### Schritt 2: Build-Script ausführen
