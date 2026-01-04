@@ -61,8 +61,7 @@ appstream-util validate-relax --nonet %{buildroot}%{_datadir}/metainfo/ch.srueeg
 %{_datadir}/bootmate/
 %{_datadir}/locale/de/LC_MESSAGES/bootmate.mo
 %{_datadir}/locale/en/LC_MESSAGES/bootmate.mo
-%{_datadir}/glib-2.0/schemas/ch.srueegger.bootmate.gschema.xml
 
 %changelog
-* Sat Jan 04 2026 Samuel Rüegger <samuel@rueegger.me> - 1.2.0-1
+* Sat Jan 04 2025 Samuel Rüegger <samuel@rueegger.me> - 1.2.1-1
 - Initial RPM package for Fedora 43
