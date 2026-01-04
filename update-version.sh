@@ -45,6 +45,10 @@ sed -i "0,/<release version=\"[0-9]\+\.[0-9]\+\.[0-9]\+\"/s/<release version=\"[
 echo "  - RELEASE.md"
 sed -i "s/\*\*Aktuelle Version:\*\* [0-9]\+\.[0-9]\+\.[0-9]\+/**Aktuelle Version:** $NEW_VERSION/" RELEASE.md
 
+# Update bootmate.spec
+echo "  - bootmate.spec"
+sed -i "s/^Version:        [0-9]\+\.[0-9]\+\.[0-9]\+/Version:        $NEW_VERSION/" bootmate.spec
+
 echo ""
 echo "Version updated to $NEW_VERSION successfully!"
 echo ""
@@ -55,6 +59,7 @@ echo "  - po/en.po"
 echo "  - po/de.po"
 echo "  - data/ch.srueegger.bootmate.metainfo.xml.in (version and date)"
 echo "  - RELEASE.md"
+echo "  - bootmate.spec"
 echo ""
 echo "Next steps:"
 echo "  1. Review changes: git diff"

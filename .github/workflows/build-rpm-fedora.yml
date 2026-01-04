@@ -1,0 +1,78 @@
+name: Build RPM Fedora 43
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build-rpm-fedora:
+    name: Build RPM (Fedora 43)
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:43
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          dnf install -y \
+            meson \
+            gcc \
+            rust \
+            cargo \
+            pkgconfig \
+            gtk4-devel \
+            libadwaita-devel \
+            glib2-devel \
+            gettext \
+            desktop-file-utils \
+            libappstream-glib \
+            rpm-build \
+            rpmdevtools
+
+      - name: Get version from meson.build
+        id: version
+        run: |
+          VERSION=$(grep "version:" meson.build | head -n1 | sed "s/.*version: '\(.*\)'.*/\1/")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Create RPM build directories
+        run: |
+          rpmdev-setuptree
+
+      - name: Create source tarball
+        run: |
+          mkdir -p /tmp/bootmate-${{ steps.version.outputs.version }}
+          cp -r * /tmp/bootmate-${{ steps.version.outputs.version }}/ 2>/dev/null || true
+          cd /tmp
+          tar czf ~/rpmbuild/SOURCES/bootmate-${{ steps.version.outputs.version }}.tar.gz bootmate-${{ steps.version.outputs.version }}
+
+      - name: Copy spec file
+        run: |
+          cp bootmate.spec ~/rpmbuild/SPECS/
+
+      - name: Update spec file version
+        run: |
+          sed -i "s/^Version:.*/Version:        ${{ steps.version.outputs.version }}/" ~/rpmbuild/SPECS/bootmate.spec
+
+      - name: Build RPM
+        run: |
+          cd ~/rpmbuild/SPECS
+          rpmbuild -ba bootmate.spec
+
+      - name: List built packages
+        run: |
+          ls -lh ~/rpmbuild/RPMS/x86_64/
+          ls -lh ~/rpmbuild/SRPMS/
+
+      - name: Upload RPM
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpm-fedora-43
+          path: |
+            ~/rpmbuild/RPMS/x86_64/*.rpm
+            ~/rpmbuild/SRPMS/*.rpm

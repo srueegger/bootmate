@@ -51,7 +51,7 @@ Pre-built DEB packages are automatically created for each release:
 
 ```bash
 # Install deb package (Ubuntu/Debian)
-sudo dpkg -i bootmate_1.0.0_amd64.deb
+sudo dpkg -i bootmate_1.2.1_amd64.deb
 sudo apt-get install -f  # Install dependencies if needed
 ```
 
