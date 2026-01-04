@@ -1,5 +1,5 @@
 Name:           bootmate
-Version:        1.2.0
+Version:        1.2.1
 Release:        1%{?dist}
 Summary:        A modern GNOME application for managing autostart entries
 
