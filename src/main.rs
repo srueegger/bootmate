@@ -20,12 +20,18 @@ fn main() -> glib::ExitCode {
     // Initialize gettext
     // For dev builds, try to use locale files from build directory
     // Check if our translation file actually exists in the system locale dir
-    let system_locale_file = std::path::PathBuf::from(LOCALEDIR)
-        .join("de/LC_MESSAGES")
-        .join(format!("{}.mo", GETTEXT_PACKAGE));
+    // Check multiple locale directories (system install and Flatpak)
+    let locale_candidates = [
+        LOCALEDIR.to_string(),
+        "/app/share/locale".to_string(),
+    ];
 
-    let locale_dir = if system_locale_file.exists() {
-        LOCALEDIR.to_string()
+    let locale_test_file = format!("de/LC_MESSAGES/{}.mo", GETTEXT_PACKAGE);
+    let found_locale_dir = locale_candidates.iter()
+        .find(|dir| std::path::PathBuf::from(dir).join(&locale_test_file).exists());
+
+    let locale_dir = if let Some(dir) = found_locale_dir {
+        dir.clone()
     } else {
         // Dev build: try multiple paths to find locale files
         let exe_path = std::env::current_exe().unwrap_or_default();
