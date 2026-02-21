@@ -8,9 +8,6 @@ else
   rust_target = 'debug'
 endif
 
-cargo_env = environment()
-cargo_env.set('CARGO_HOME', meson.project_build_root() / 'cargo-home')
-
 cargo_build = custom_target(
   'cargo-build',
   build_by_default: true,
@@ -28,5 +25,4 @@ cargo_build = custom_target(
     meson.project_build_root() / 'src' / rust_target / 'bootmate',
     '@OUTPUT@',
   ],
-  env: cargo_env,
 )

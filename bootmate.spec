@@ -47,17 +47,17 @@ Features:
 %meson_install
 
 %check
-desktop-file-validate %{buildroot}%{_datadir}/applications/ch.srueegger.bootmate.desktop
-appstream-util validate-relax --nonet %{buildroot}%{_datadir}/metainfo/ch.srueegger.bootmate.metainfo.xml
+desktop-file-validate %{buildroot}%{_datadir}/applications/me.rueegger.bootmate.desktop
+appstream-util validate-relax --nonet %{buildroot}%{_datadir}/metainfo/me.rueegger.bootmate.metainfo.xml
 
 %files
 %license LICENSE
 %doc README.md
 %{_bindir}/bootmate
-%{_datadir}/applications/ch.srueegger.bootmate.desktop
-%{_datadir}/metainfo/ch.srueegger.bootmate.metainfo.xml
-%{_datadir}/icons/hicolor/scalable/apps/ch.srueegger.bootmate.svg
-%{_datadir}/icons/hicolor/symbolic/apps/ch.srueegger.bootmate-symbolic.svg
+%{_datadir}/applications/me.rueegger.bootmate.desktop
+%{_datadir}/metainfo/me.rueegger.bootmate.metainfo.xml
+%{_datadir}/icons/hicolor/scalable/apps/me.rueegger.bootmate.svg
+%{_datadir}/icons/hicolor/symbolic/apps/me.rueegger.bootmate-symbolic.svg
 %{_datadir}/bootmate/
 %{_datadir}/locale/de/LC_MESSAGES/bootmate.mo
 %{_datadir}/locale/en/LC_MESSAGES/bootmate.mo

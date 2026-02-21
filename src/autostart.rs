@@ -103,6 +103,31 @@ impl AutostartEntry {
         }
     }
 
+    /// Get the host path prefix for system directories.
+    /// In Flatpak, host paths are mounted at /run/host/.
+    fn host_prefix() -> &'static str {
+        if Self::detect_sandbox() == SandboxType::Flatpak {
+            "/run/host"
+        } else {
+            ""
+        }
+    }
+
+    /// Get the path to /etc/xdg/autostart (host-aware)
+    pub fn etc_xdg_autostart_path() -> PathBuf {
+        PathBuf::from(format!("{}/etc/xdg/autostart", Self::host_prefix()))
+    }
+
+    /// Get the path to /usr/share/gnome/autostart (host-aware)
+    pub fn usr_share_gnome_autostart_path() -> PathBuf {
+        PathBuf::from(format!("{}/usr/share/gnome/autostart", Self::host_prefix()))
+    }
+
+    /// Get the path to /usr/share/applications (host-aware)
+    pub fn usr_share_applications_path() -> PathBuf {
+        PathBuf::from(format!("{}/usr/share/applications", Self::host_prefix()))
+    }
+
     /// Check which autostart directories are accessible
     pub fn check_directory_access() -> DirectoryAccess {
         let sandbox_type = Self::detect_sandbox();
@@ -122,10 +147,10 @@ impl AutostartEntry {
                                    fs::create_dir_all(&user_autostart).is_ok();
         }
 
-        // Check system directories
-        access.etc_xdg_autostart = fs::read_dir("/etc/xdg/autostart").is_ok();
-        access.usr_share_gnome_autostart = fs::read_dir("/usr/share/gnome/autostart").is_ok();
-        access.usr_share_applications = fs::read_dir("/usr/share/applications").is_ok();
+        // Check system directories (use host-aware paths)
+        access.etc_xdg_autostart = fs::read_dir(Self::etc_xdg_autostart_path()).is_ok();
+        access.usr_share_gnome_autostart = fs::read_dir(Self::usr_share_gnome_autostart_path()).is_ok();
+        access.usr_share_applications = fs::read_dir(Self::usr_share_applications_path()).is_ok();
 
         access
     }
@@ -151,14 +176,13 @@ impl AutostartEntry {
             }
         }
 
-        // System autostart directories
+        // System autostart directories (use host-aware paths for Flatpak)
         let system_dirs = vec![
-            "/etc/xdg/autostart",
-            "/usr/share/gnome/autostart",
+            Self::etc_xdg_autostart_path(),
+            Self::usr_share_gnome_autostart_path(),
         ];
 
-        for dir in system_dirs {
-            let autostart_dir = PathBuf::from(dir);
+        for autostart_dir in system_dirs {
             if let Ok(dir_entries) = fs::read_dir(&autostart_dir) {
                 for entry in dir_entries.flatten() {
                     let path = entry.path();

@@ -22,7 +22,7 @@ Die Version muss in folgenden Dateien angepasst werden:
 - `meson.build` (Zeile 4)
 - `po/en.po` (Zeile 8)
 - `po/de.po` (Zeile 8)
-- `data/ch.srueegger.bootmate.metainfo.xml.in` (Zeile 28 - Version UND Datum)
+- `data/me.rueegger.bootmate.metainfo.xml.in` (Zeile 28 - Version UND Datum)
 
 **Beispiel für Version 1.1.0:**
 
@@ -33,7 +33,7 @@ Die Version muss in folgenden Dateien angepasst werden:
 
 ### 2. Release-Notizen in metainfo.xml.in
 
-Aktualisiere die Release-Beschreibung in `data/ch.srueegger.bootmate.metainfo.xml.in`:
+Aktualisiere die Release-Beschreibung in `data/me.rueegger.bootmate.metainfo.xml.in`:
 
 ```xml
 <release version="1.1.0" date="2025-12-15">

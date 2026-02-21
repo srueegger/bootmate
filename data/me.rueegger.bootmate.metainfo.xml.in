@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>ch.srueegger.bootmate</id>
+  <id>me.rueegger.bootmate</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-2.0-only</project_license>
   <name>Boot Mate</name>
@@ -16,16 +16,23 @@
       log in to your GNOME session.
     </p>
   </description>
-  <launchable type="desktop-id">ch.srueegger.bootmate.desktop</launchable>
+  <launchable type="desktop-id">me.rueegger.bootmate.desktop</launchable>
   <provides>
     <binary>bootmate</binary>
   </provides>
   <url type="homepage">https://github.com/srueegger/bootmate</url>
   <url type="bugtracker">https://github.com/srueegger/bootmate/issues</url>
-  <developer_name>Samuel Rüegger</developer_name>
+  <url type="vcs-browser">https://github.com/srueegger/bootmate</url>
+  <developer id="me.rueegger">
+    <name>Samuel Rüegger</name>
+  </developer>
+  <branding>
+    <color type="primary" scheme_preference="light">#99c1f1</color>
+    <color type="primary" scheme_preference="dark">#1a5fb4</color>
+  </branding>
   <content_rating type="oars-1.1" />
   <releases>
-  <release version="1.2.1" date="2025-12-13">
+    <release version="1.2.1" date="2025-12-13">
       <description>
         <p>New features and improvements</p>
         <ul>
@@ -33,11 +40,10 @@
           <li>Visual feedback: disabled entries appear dimmed for better clarity</li>
           <li>Larger application icons for improved visibility</li>
           <li>Fix markup parsing warnings for entry names with special characters</li>
-          <li>Professional README without emojis</li>
         </ul>
       </description>
     </release>
-    <release version="1.2.0" date="2026-01-04">
+    <release version="1.2.0" date="2025-12-04">
       <description>
         <p>New features and improvements</p>
         <ul>
@@ -56,7 +62,7 @@
         </ul>
       </description>
     </release>
-    <release version="1.0.0" date="2025-11-30">
+    <release version="1.0.0" date="2025-11-28">
       <description>
         <p>First stable release</p>
         <ul>
@@ -72,7 +78,20 @@
   </releases>
   <screenshots>
     <screenshot type="default">
-      <caption>Main window showing autostart entries</caption>
+      <caption>Main window showing autostart entries in light mode</caption>
+      <image>https://raw.githubusercontent.com/srueegger/bootmate/main/screenshots/bootmate-light.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Main window in dark mode</caption>
+      <image>https://raw.githubusercontent.com/srueegger/bootmate/main/screenshots/bootmate-dark.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Adding a new autostart entry in light mode</caption>
+      <image>https://raw.githubusercontent.com/srueegger/bootmate/main/screenshots/bootmate-light-add.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Adding a new autostart entry in dark mode</caption>
+      <image>https://raw.githubusercontent.com/srueegger/bootmate/main/screenshots/bootmate-dark-add.png</image>
     </screenshot>
   </screenshots>
 </component>
