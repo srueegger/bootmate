@@ -113,6 +113,19 @@ impl AutostartEntry {
         }
     }
 
+    /// Get the user autostart directory path.
+    /// In Flatpak, glib::user_config_dir() returns the sandboxed path
+    /// (~/.var/app/<id>/config/), but we need the real ~/.config/autostart
+    /// which is accessible via --filesystem=xdg-config/autostart.
+    pub fn user_autostart_path() -> PathBuf {
+        if Self::detect_sandbox() == SandboxType::Flatpak {
+            if let Ok(home) = std::env::var("HOME") {
+                return PathBuf::from(home).join(".config").join("autostart");
+            }
+        }
+        glib::user_config_dir().join("autostart")
+    }
+
     /// Get the path to /etc/xdg/autostart (host-aware)
     pub fn etc_xdg_autostart_path() -> PathBuf {
         PathBuf::from(format!("{}/etc/xdg/autostart", Self::host_prefix()))
@@ -141,11 +154,9 @@ impl AutostartEntry {
         };
 
         // Check user autostart directory
-        if let Some(user_dir) = glib::user_config_dir().as_path().to_str() {
-            let user_autostart = PathBuf::from(user_dir).join("autostart");
-            access.user_autostart = fs::read_dir(&user_autostart).is_ok() ||
-                                   fs::create_dir_all(&user_autostart).is_ok();
-        }
+        let user_autostart = Self::user_autostart_path();
+        access.user_autostart = fs::read_dir(&user_autostart).is_ok() ||
+                               fs::create_dir_all(&user_autostart).is_ok();
 
         // Check system directories (use host-aware paths)
         access.etc_xdg_autostart = fs::read_dir(Self::etc_xdg_autostart_path()).is_ok();
@@ -161,8 +172,8 @@ impl AutostartEntry {
         let mut seen_names = HashMap::new();
 
         // User autostart directory (takes precedence)
-        if let Some(user_dir) = glib::user_config_dir().as_path().to_str() {
-            let user_autostart = PathBuf::from(user_dir).join("autostart");
+        {
+            let user_autostart = Self::user_autostart_path();
             if let Ok(dir_entries) = fs::read_dir(&user_autostart) {
                 for entry in dir_entries.flatten() {
                     let path = entry.path();
@@ -206,8 +217,8 @@ impl AutostartEntry {
     pub fn delete(&self) -> Result<(), String> {
         if !self.is_user_entry {
             // For system entries, create a user override that hides it
-            if let Some(user_dir) = glib::user_config_dir().as_path().to_str() {
-                let user_autostart = PathBuf::from(user_dir).join("autostart");
+            {
+                let user_autostart = Self::user_autostart_path();
                 fs::create_dir_all(&user_autostart)
                     .map_err(|e| format!("Failed to create autostart directory: {}", e))?;
 
@@ -261,8 +272,7 @@ impl AutostartEntry {
 
     /// Save changes to this entry
     pub fn save(&self, new_exec: &str) -> Result<(), String> {
-        let user_dir = glib::user_config_dir();
-        let user_autostart = user_dir.join("autostart");
+        let user_autostart = Self::user_autostart_path();
 
         fs::create_dir_all(&user_autostart)
             .map_err(|e| format!("Failed to create autostart directory: {}", e))?;
@@ -276,8 +286,7 @@ impl AutostartEntry {
 
     /// Set the enabled state of this entry
     pub fn set_enabled(&self, enabled: bool) -> Result<(), String> {
-        let user_dir = glib::user_config_dir();
-        let user_autostart = user_dir.join("autostart");
+        let user_autostart = Self::user_autostart_path();
 
         fs::create_dir_all(&user_autostart)
             .map_err(|e| format!("Failed to create autostart directory: {}", e))?;

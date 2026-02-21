@@ -321,8 +321,7 @@ impl BootMateWindow {
                         .collect::<String>()
                         + ".desktop";
 
-                    let user_dir = glib::user_config_dir();
-                    let file_path = user_dir.join("autostart").join(&filename);
+                    let file_path = AutostartEntry::user_autostart_path().join(&filename);
 
                     // Check if file already exists
                     if file_path.exists() {
