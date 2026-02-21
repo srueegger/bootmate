@@ -16,7 +16,7 @@ mod imp {
     use super::*;
 
     #[derive(Debug, Default, gtk::CompositeTemplate)]
-    #[template(resource = "/ch/srueegger/bootmate/ui/window.ui")]
+    #[template(resource = "/me/rueegger/bootmate/ui/window.ui")]
     pub struct BootMateWindow {
         #[template_child]
         pub header_bar: TemplateChild<adw::HeaderBar>,
@@ -196,12 +196,12 @@ impl BootMateWindow {
             .title(gettext("Application"))
             .build();
 
-        // Load available .desktop files from /usr/share/applications
+        // Load available .desktop files from applications directory (host-aware)
         let programs = gtk::StringList::new(&[]);
-        let applications_dir = std::path::Path::new("/usr/share/applications");
+        let applications_dir = AutostartEntry::usr_share_applications_path();
         let app_commands: Rc<RefCell<Vec<String>>> = Rc::new(RefCell::new(Vec::new()));
 
-        if let Ok(entries) = std::fs::read_dir(applications_dir) {
+        if let Ok(entries) = std::fs::read_dir(&applications_dir) {
             let mut app_list: Vec<(String, String)> = Vec::new();
 
             for entry in entries.flatten() {
@@ -377,16 +377,13 @@ impl BootMateWindow {
                     let mut msg = format!("{}\n", header);
 
                     if !access.user_autostart {
-                        msg.push_str("flatpak override --user ch.srueegger.bootmate --filesystem=xdg-config/autostart\n");
+                        msg.push_str("flatpak override --user me.rueegger.bootmate --filesystem=xdg-config/autostart\n");
                     }
-                    if !access.etc_xdg_autostart {
-                        msg.push_str("flatpak override --user ch.srueegger.bootmate --filesystem=/etc/xdg/autostart:ro\n");
-                    }
-                    if !access.usr_share_gnome_autostart {
-                        msg.push_str("flatpak override --user ch.srueegger.bootmate --filesystem=/usr/share/gnome/autostart:ro\n");
+                    if !access.etc_xdg_autostart || !access.usr_share_gnome_autostart {
+                        msg.push_str("flatpak override --user me.rueegger.bootmate --filesystem=host-etc:ro\n");
                     }
                     if !access.usr_share_applications {
-                        msg.push_str("flatpak override --user ch.srueegger.bootmate --filesystem=/usr/share/applications:ro\n");
+                        msg.push_str("flatpak override --user me.rueegger.bootmate --filesystem=host-os:ro\n");
                     }
                     msg
                 },

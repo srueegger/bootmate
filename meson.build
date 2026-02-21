@@ -9,7 +9,7 @@ project(
 i18n = import('i18n')
 gnome = import('gnome')
 
-base_id = 'ch.srueegger.bootmate'
+base_id = 'me.rueegger.bootmate'
 
 dependency('glib-2.0', version: '>= 2.66')
 dependency('gio-2.0', version: '>= 2.66')
@@ -43,7 +43,6 @@ subdir('src')
 subdir('po')
 
 gnome.post_install(
-  glib_compile_schemas: true,
   gtk_update_icon_cache: true,
   update_desktop_database: true,
 )

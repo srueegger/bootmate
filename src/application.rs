@@ -79,7 +79,7 @@ impl BootMateApplication {
         let window = self.active_window().unwrap();
         let about = adw::AboutDialog::builder()
             .application_name(gettext("Boot Mate"))
-            .application_icon("ch.srueegger.bootmate")
+            .application_icon("me.rueegger.bootmate")
             .developer_name("Samuel Rüegger")
             .version(VERSION)
             .developers(vec![

@@ -16,20 +16,20 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: data/ch.srueegger.bootmate.desktop.in:3
-#: data/ch.srueegger.bootmate.metainfo.xml.in:7
+#: data/me.rueegger.bootmate.desktop.in:3
+#: data/me.rueegger.bootmate.metainfo.xml.in:7
 #: data/ui/window.ui:6
 #: src/application.rs
 msgid "Boot Mate"
 msgstr "Boot Mate"
 
-#: data/ch.srueegger.bootmate.desktop.in:4
-#: data/ch.srueegger.bootmate.metainfo.xml.in:8
+#: data/me.rueegger.bootmate.desktop.in:4
+#: data/me.rueegger.bootmate.metainfo.xml.in:8
 #: src/application.rs
 msgid "Manage autostart entries"
 msgstr "Autostart-Einträge verwalten"
 
-#: data/ch.srueegger.bootmate.desktop.in:10
+#: data/me.rueegger.bootmate.desktop.in:10
 msgid "autostart;startup;boot;session;"
 msgstr "autostart;automatisch;start;sitzung;"
 

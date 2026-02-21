@@ -2,7 +2,7 @@
 Name=Boot Mate
 Comment=Manage autostart entries
 Exec=bootmate
-Icon=ch.srueegger.bootmate
+Icon=me.rueegger.bootmate
 Terminal=false
 Type=Application
 Categories=GNOME;GTK;System;Settings;

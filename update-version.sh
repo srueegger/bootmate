@@ -35,11 +35,11 @@ echo "  - po/de.po"
 sed -i "s/Project-Id-Version: bootmate [0-9]\+\.[0-9]\+\.[0-9]\+/Project-Id-Version: bootmate $NEW_VERSION/" po/de.po
 
 # Update metainfo.xml.in - only update the first (newest) release version
-echo "  - data/ch.srueegger.bootmate.metainfo.xml.in"
+echo "  - data/me.rueegger.bootmate.metainfo.xml.in"
 # Get current date in YYYY-MM-DD format
 CURRENT_DATE=$(date +%Y-%m-%d)
 # Update only the first occurrence of release version
-sed -i "0,/<release version=\"[0-9]\+\.[0-9]\+\.[0-9]\+\"/s/<release version=\"[0-9]\+\.[0-9]\+\.[0-9]\+\" date=\"[^\"]*\">/<release version=\"$NEW_VERSION\" date=\"$CURRENT_DATE\">/" data/ch.srueegger.bootmate.metainfo.xml.in
+sed -i "0,/<release version=\"[0-9]\+\.[0-9]\+\.[0-9]\+\"/s/<release version=\"[0-9]\+\.[0-9]\+\.[0-9]\+\" date=\"[^\"]*\">/<release version=\"$NEW_VERSION\" date=\"$CURRENT_DATE\">/" data/me.rueegger.bootmate.metainfo.xml.in
 
 # Update RELEASE.md
 echo "  - RELEASE.md"
@@ -57,11 +57,11 @@ echo "  - meson.build"
 echo "  - Cargo.toml"
 echo "  - po/en.po"
 echo "  - po/de.po"
-echo "  - data/ch.srueegger.bootmate.metainfo.xml.in (version and date)"
+echo "  - data/me.rueegger.bootmate.metainfo.xml.in (version and date)"
 echo "  - RELEASE.md"
 echo "  - bootmate.spec"
 echo ""
 echo "Next steps:"
 echo "  1. Review changes: git diff"
-echo "  2. Add release notes to data/ch.srueegger.bootmate.metainfo.xml.in"
+echo "  2. Add release notes to data/me.rueegger.bootmate.metainfo.xml.in"
 echo "  3. Commit: git add . && git commit -m 'Bump version to $NEW_VERSION'"
