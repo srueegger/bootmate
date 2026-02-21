@@ -32,14 +32,14 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
-    <release version="1.2.1" date="2025-12-13">
+    <release version="1.3.0" date="2026-02-21">
       <description>
-        <p>New features and improvements</p>
+        <p>Flatpak support and new app identity</p>
         <ul>
-          <li>Add enable/disable toggle switches for quick control of autostart entries</li>
-          <li>Visual feedback: disabled entries appear dimmed for better clarity</li>
-          <li>Larger application icons for improved visibility</li>
-          <li>Fix markup parsing warnings for entry names with special characters</li>
+          <li>App ID changed to me.rueegger.bootmate for Flathub verification</li>
+          <li>Full Flatpak support with proper sandbox permissions</li>
+          <li>Host-aware paths for system autostart directories in Flatpak</li>
+          <li>Updated metadata for Flathub compliance</li>
         </ul>
       </description>
     </release>

@@ -173,5 +173,5 @@ Boot Mate folgt Semantic Versioning:
 
 ---
 
-**Letzte Aktualisierung:** 2025-11-30
-**Aktuelle Version:** 1.2.1
+**Letzte Aktualisierung:** 2026-02-21
+**Aktuelle Version:** 1.3.0
