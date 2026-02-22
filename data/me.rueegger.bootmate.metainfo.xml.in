@@ -45,10 +45,10 @@
       <description>
         <p>Flatpak support and new app identity</p>
         <ul>
-          <li>App ID changed to me.rueegger.bootmate for Flathub verification</li>
+          <li>App ID changed to me.rueegger.bootmate for domain verification</li>
           <li>Full Flatpak support with proper sandbox permissions</li>
           <li>Host-aware paths for system autostart directories in Flatpak</li>
-          <li>Updated metadata for Flathub compliance</li>
+          <li>Updated AppStream metadata</li>
         </ul>
       </description>
     </release>

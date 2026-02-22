@@ -43,16 +43,19 @@ A modern GNOME application for managing autostart entries, built with Rust and l
 
 ## Installation
 
-### Download Pre-built Packages
+### Flatpak (Recommended)
 
-Pre-built DEB packages are automatically created for each release:
-
-- **DEB Package**: Download from [GitHub Releases](https://github.com/srueegger/bootmate/releases)
+Install Boot Mate from the rueegger-dev Flatpak repository:
 
 ```bash
-# Install deb package (Ubuntu/Debian)
-sudo dpkg -i bootmate_1.2.1_amd64.deb
-sudo apt-get install -f  # Install dependencies if needed
+flatpak remote-add --if-not-exists rueegger-dev https://flatpak.rueegger.dev/rueegger-dev.flatpakrepo
+flatpak install rueegger-dev me.rueegger.bootmate
+```
+
+Or install directly via the flatpakref file:
+
+```bash
+flatpak install https://flatpak.rueegger.dev/me.rueegger.bootmate.flatpakref
 ```
 
 ### From Source
@@ -63,8 +66,8 @@ If you prefer to build from source, see the [Building](#building) section below.
 
 ### Runtime Dependencies
 
-- GTK 4.10 or later (GTK 4.12+ included in Ubuntu 24.04 LTS)
-- libadwaita 1.4 or later (libadwaita 1.4+ included in Ubuntu 24.04 LTS)
+- GTK 4.10 or later
+- libadwaita 1.5 or later
 - GLib 2.66 or later
 
 ### Build Dependencies
@@ -73,18 +76,7 @@ If you prefer to build from source, see the [Building](#building) section below.
 - Meson 0.59 or later
 - Cargo
 - glib-compile-resources
-- glib-compile-schemas
 - gettext
-
-### Ubuntu 24.04 LTS
-
-On Ubuntu 24.04 LTS, you can install all dependencies with:
-
-```bash
-sudo apt install build-essential meson cargo rustc \
-    libgtk-4-dev libadwaita-1-dev libglib2.0-dev \
-    gettext appstream desktop-file-utils
-```
 
 ## Building
 
@@ -117,6 +109,14 @@ For optimized release build:
 ```bash
 meson setup build -Dprofile=release
 meson compile -C build
+```
+
+### Flatpak Build
+
+To build as a Flatpak locally:
+
+```bash
+flatpak-builder --user --install --force-clean --disable-rofiles-fuse _flatpak me.rueegger.bootmate.yml
 ```
 
 ## Running
@@ -209,4 +209,4 @@ See [LICENSE](LICENSE) for the full license text.
 
 - Built with [GTK 4](https://gtk.org/) and [libadwaita](https://gnome.pages.gitlab.gnome.org/libadwaita/)
 - Rust bindings by [gtk-rs](https://gtk-rs.org/)
-- Designed for modern GNOME desktop environments on Ubuntu 24.04 LTS and later
+- Designed for modern GNOME desktop environments
