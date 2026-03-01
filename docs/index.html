@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boot Mate — Autostart Manager for GNOME</title>
+    <meta name="description" content="Boot Mate is a simple and modern application to manage autostart entries on GNOME. View, edit, enable, disable and add autostart applications.">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <style>
+        :root {
+            --bg: #fafafa;
+            --surface: #ffffff;
+            --surface-alt: #f3f4f6;
+            --text: #1a1a2e;
+            --muted: #6b7280;
+            --accent: #3584e4;
+            --accent-hover: #1c71d8;
+            --border: #e5e7eb;
+            --code-bg: #f3f4f6;
+            --hero-bg: linear-gradient(135deg, #1a5fb4 0%, #3584e4 50%, #62a0ea 100%);
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+            --card-shadow-hover: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #111827;
+                --surface: #1f2937;
+                --surface-alt: #283040;
+                --text: #f3f4f6;
+                --muted: #9ca3af;
+                --accent: #60a5fa;
+                --accent-hover: #93bbfd;
+                --border: #374151;
+                --code-bg: #283040;
+                --hero-bg: linear-gradient(135deg, #0f2d5e 0%, #1a4a8a 50%, #1c5db4 100%);
+                --card-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+                --card-shadow-hover: 0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2);
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* ── Hero ──────────────────────────────────── */
+
+        .hero {
+            background: var(--hero-bg);
+            color: #ffffff;
+            text-align: center;
+            padding: 5rem 1.5rem 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(to bottom, transparent, var(--bg));
+        }
+
+        .hero-icon {
+            width: 96px;
+            height: 96px;
+            margin: 0 auto 1.5rem;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+        }
+
+        .hero h1 {
+            font-size: 2.75rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 560px;
+            margin: 0 auto 2rem;
+            line-height: 1.5;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .btn:hover { transform: translateY(-1px); }
+
+        .btn-primary {
+            background: #ffffff;
+            color: #1a5fb4;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.15);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-secondary:hover { background: rgba(255,255,255,0.25); }
+
+        /* ── Hero Screenshot ──────────────────────── */
+
+        .hero-screenshot {
+            max-width: 560px;
+            margin: 2rem auto 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-screenshot img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+        }
+
+        .hero-screenshot .light-img { display: block; }
+        .hero-screenshot .dark-img { display: none; }
+
+        @media (prefers-color-scheme: dark) {
+            .hero-screenshot .light-img { display: none; }
+            .hero-screenshot .dark-img { display: block; }
+        }
+
+        /* ── Sections ─────────────────────────────── */
+
+        section {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 4rem 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-subtitle {
+            color: var(--muted);
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 1.05rem;
+        }
+
+        /* ── Features ─────────────────────────────── */
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+
+        .feature-card:hover {
+            box-shadow: var(--card-shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        .feature-icon {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+            width: 48px;
+            height: 48px;
+            background: var(--surface-alt);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feature-card h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+
+        .feature-card p {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        /* ── Screenshots ──────────────────────────── */
+
+        .screenshots {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .screenshot-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .screenshot-item img {
+            width: 100%;
+            display: block;
+        }
+
+        .screenshot-item .light-img { display: block; }
+        .screenshot-item .dark-img { display: none; }
+
+        @media (prefers-color-scheme: dark) {
+            .screenshot-item .light-img { display: none; }
+            .screenshot-item .dark-img { display: block; }
+        }
+
+        .screenshot-caption {
+            padding: 1.25rem 1.5rem;
+        }
+
+        .screenshot-caption h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .screenshot-caption p {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        /* ── Install ──────────────────────────────── */
+
+        .install-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 640px;
+            margin: 0 auto;
+            box-shadow: var(--card-shadow);
+        }
+
+        .install-steps {
+            list-style: none;
+            counter-reset: step;
+        }
+
+        .install-steps li {
+            counter-increment: step;
+            margin-bottom: 1.5rem;
+            padding-left: 2.5rem;
+            position: relative;
+        }
+
+        .install-steps li:last-child { margin-bottom: 0; }
+
+        .install-steps li::before {
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            top: 0.05rem;
+            width: 1.75rem;
+            height: 1.75rem;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .install-steps li p {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .code-block pre {
+            padding: 0.75rem 1rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .code-block code {
+            font-family: "JetBrains Mono", "Fira Code", "SF Mono", Consolas, monospace;
+        }
+
+        .code-block .copy-bar {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0.25rem 0.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.75rem;
+            color: var(--muted);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .copy-btn:hover {
+            color: var(--text);
+            background: var(--border);
+        }
+
+        /* ── Footer ───────────────────────────────── */
+
+        footer {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            color: var(--muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover { text-decoration: underline; }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+
+        /* ── Responsive ───────────────────────────── */
+
+        @media (max-width: 640px) {
+            .hero { padding: 3rem 1.25rem 2rem; }
+            .hero h1 { font-size: 2rem; }
+            .hero .tagline { font-size: 1rem; }
+            section { padding: 3rem 1.25rem; }
+            .features-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- ── Hero ──────────────────────────────────── -->
+    <div class="hero">
+        <div class="hero-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 128 128">
+                <defs>
+                    <linearGradient id="rocketBody" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#3584e4"/><stop offset="100%" style="stop-color:#1c71d8"/></linearGradient>
+                    <linearGradient id="rocketTop" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#62a0ea"/><stop offset="100%" style="stop-color:#3584e4"/></linearGradient>
+                    <linearGradient id="flame" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#ff7800"/><stop offset="50%" style="stop-color:#e01b24"/><stop offset="100%" style="stop-color:#c01c28"/></linearGradient>
+                    <linearGradient id="platform" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#77767b"/><stop offset="100%" style="stop-color:#5e5c64"/></linearGradient>
+                </defs>
+                <rect x="16" y="100" width="96" height="12" rx="2" fill="#3d3846"/>
+                <rect x="16" y="96" width="96" height="8" rx="2" fill="url(#platform)"/>
+                <rect x="20" y="96" width="6" height="16" rx="1" fill="#5e5c64"/>
+                <rect x="102" y="96" width="6" height="16" rx="1" fill="#5e5c64"/>
+                <ellipse cx="64" cy="88" rx="10" ry="14" fill="url(#flame)" opacity="0.9"/>
+                <rect x="48" y="32" width="32" height="56" rx="3" fill="url(#rocketBody)"/>
+                <path d="M 48,32 L 44,36 L 44,92 L 48,88 Z" fill="#1c71d8" opacity="0.7"/>
+                <path d="M 48,32 L 64,12 L 80,32 Z" fill="url(#rocketTop)"/>
+                <path d="M 48,32 L 44,36 L 64,16 Z" fill="#3584e4" opacity="0.7"/>
+                <circle cx="64" cy="48" r="8" fill="#1a5fb4" opacity="0.5"/>
+                <circle cx="64" cy="48" r="6" fill="#99c1f1" opacity="0.8"/>
+                <circle cx="62" cy="46" r="2" fill="#deddda" opacity="0.9"/>
+                <path d="M 48,68 L 48,88 L 36,88 L 40,76 Z" fill="url(#rocketTop)"/>
+                <path d="M 48,68 L 44,72 L 40,76 L 36,88 L 48,88 Z" fill="#1c71d8" opacity="0.7"/>
+                <path d="M 80,68 L 80,88 L 92,88 L 88,76 Z" fill="url(#rocketTop)"/>
+                <rect x="48" y="60" width="32" height="3" rx="1" fill="#deddda" opacity="0.3"/>
+                <rect x="48" y="76" width="32" height="3" rx="1" fill="#deddda" opacity="0.3"/>
+                <circle cx="76" cy="22" r="9" fill="#f6f5f4" opacity="0.95"/>
+                <path d="M 70,24 L 74,28 L 82,18" stroke="#9141ac" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+        </div>
+        <h1>Boot Mate</h1>
+        <p class="tagline" data-i18n="tagline"></p>
+        <div class="hero-buttons">
+            <a href="#install" class="btn btn-primary" data-i18n="installBtn"></a>
+            <a href="https://github.com/srueegger/bootmate" class="btn btn-secondary">GitHub</a>
+        </div>
+        <div class="hero-screenshot">
+            <img class="light-img" src="screenshots/bootmate-light.png" alt="Boot Mate">
+            <img class="dark-img" src="screenshots/bootmate-dark.png" alt="Boot Mate (Dark)">
+        </div>
+    </div>
+
+    <!-- ── Features ──────────────────────────────── -->
+    <section>
+        <h2 class="section-title" data-i18n="featuresTitle"></h2>
+        <p class="section-subtitle" data-i18n="featuresSubtitle"></p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                </div>
+                <h3 data-i18n="feat1Title"></h3>
+                <p data-i18n="feat1Desc"></p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+                <h3 data-i18n="feat2Title"></h3>
+                <p data-i18n="feat2Desc"></p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <h3 data-i18n="feat3Title"></h3>
+                <p data-i18n="feat3Desc"></p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </div>
+                <h3 data-i18n="feat4Title"></h3>
+                <p data-i18n="feat4Desc"></p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <h3 data-i18n="feat5Title"></h3>
+                <p data-i18n="feat5Desc"></p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                </div>
+                <h3 data-i18n="feat6Title"></h3>
+                <p data-i18n="feat6Desc"></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Screenshots ───────────────────────────── -->
+    <section>
+        <h2 class="section-title" data-i18n="screenshotsTitle"></h2>
+        <p class="section-subtitle" data-i18n="screenshotsSubtitle"></p>
+        <div class="screenshots">
+            <div class="screenshot-item">
+                <img class="light-img" src="screenshots/bootmate-light-add.png" alt="Add autostart entry">
+                <img class="dark-img" src="screenshots/bootmate-dark-add.png" alt="Add autostart entry (Dark)">
+                <div class="screenshot-caption">
+                    <h3 data-i18n="ss1Title"></h3>
+                    <p data-i18n="ss1Desc"></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Install ───────────────────────────────── -->
+    <section id="install">
+        <h2 class="section-title" data-i18n="installTitle"></h2>
+        <p class="section-subtitle" data-i18n="installSubtitle"></p>
+        <div class="install-card">
+            <ol class="install-steps">
+                <li>
+                    <p data-i18n="step1"></p>
+                    <div class="code-block">
+                        <pre><code>flatpak remote-add --if-not-exists rueegger-dev https://flatpak.rueegger.dev/rueegger-dev.flatpakrepo</code></pre>
+                        <div class="copy-bar"><button class="copy-btn" onclick="copy(this)" data-i18n="copy"></button></div>
+                    </div>
+                </li>
+                <li>
+                    <p data-i18n="step2"></p>
+                    <div class="code-block">
+                        <pre><code>flatpak install rueegger-dev me.rueegger.bootmate</code></pre>
+                        <div class="copy-bar"><button class="copy-btn" onclick="copy(this)" data-i18n="copy"></button></div>
+                    </div>
+                </li>
+                <li>
+                    <p data-i18n="step3"></p>
+                    <div class="code-block">
+                        <pre><code>flatpak run me.rueegger.bootmate</code></pre>
+                        <div class="copy-bar"><button class="copy-btn" onclick="copy(this)" data-i18n="copy"></button></div>
+                    </div>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- ── Footer ────────────────────────────────── -->
+    <footer>
+        <p>Boot Mate — GPL-2.0 &middot; Samuel Rüegger</p>
+        <div class="footer-links">
+            <a href="https://github.com/srueegger/bootmate">GitHub</a>
+            <a href="https://flatpak.rueegger.dev">Flatpak Repo</a>
+            <a href="https://rueegger.me">Blog</a>
+        </div>
+    </footer>
+
+    <script>
+        const i18n = {
+            de: {
+                tagline: 'Eine einfache und moderne Anwendung zum Verwalten von Autostart-Einträgen auf GNOME.',
+                installBtn: 'Installieren',
+                featuresTitle: 'Features',
+                featuresSubtitle: 'Volle Kontrolle über deine Autostart-Programme.',
+                feat1Title: 'Übersichtliche Verwaltung',
+                feat1Desc: 'Alle Autostart-Einträge aus Benutzer- und Systemverzeichnissen auf einen Blick.',
+                feat2Title: 'Einträge bearbeiten',
+                feat2Desc: 'Befehle, Parameter und Namen von Autostart-Einträgen direkt anpassen.',
+                feat3Title: 'Aktivieren & Deaktivieren',
+                feat3Desc: 'Autostart-Einträge per Klick ein- oder ausschalten, ohne sie zu löschen.',
+                feat4Title: 'Mehrsprachig',
+                feat4Desc: 'Verfügbar auf Deutsch und Englisch. Folgt automatisch deiner Systemsprache.',
+                feat5Title: 'Sicher',
+                feat5Desc: 'System-Einträge werden nie verändert — Anpassungen werden als Benutzer-Kopie gespeichert.',
+                feat6Title: 'GNOME Integration',
+                feat6Desc: 'Nativer Look mit libadwaita. Folgt den GNOME Human Interface Guidelines mit Light und Dark Mode.',
+                screenshotsTitle: 'Screenshots',
+                screenshotsSubtitle: 'Passt sich automatisch an dein System-Theme an.',
+                ss1Title: 'Autostart-Eintrag hinzufügen',
+                ss1Desc: 'Neue Einträge aus installierten Anwendungen oder mit benutzerdefiniertem Befehl erstellen.',
+                installTitle: 'Installation',
+                installSubtitle: 'Boot Mate ist als Flatpak verfügbar.',
+                step1: 'Repository hinzufügen',
+                step2: 'Boot Mate installieren',
+                step3: 'Starten',
+                copy: 'Kopieren',
+                copied: 'Kopiert!'
+            },
+            en: {
+                tagline: 'A simple and modern application to manage autostart entries on GNOME.',
+                installBtn: 'Install',
+                featuresTitle: 'Features',
+                featuresSubtitle: 'Full control over your autostart applications.',
+                feat1Title: 'Clear Overview',
+                feat1Desc: 'See all autostart entries from user and system directories at a glance.',
+                feat2Title: 'Edit Entries',
+                feat2Desc: 'Modify commands, parameters, and names of autostart entries directly.',
+                feat3Title: 'Enable & Disable',
+                feat3Desc: 'Toggle autostart entries on or off with a single click, without deleting them.',
+                feat4Title: 'Multi-Language',
+                feat4Desc: 'Available in English and German. Automatically follows your system language.',
+                feat5Title: 'Safe',
+                feat5Desc: 'System entries are never modified — changes are saved as user-level copies.',
+                feat6Title: 'GNOME Integration',
+                feat6Desc: 'Native look with libadwaita. Follows GNOME Human Interface Guidelines with light and dark mode.',
+                screenshotsTitle: 'Screenshots',
+                screenshotsSubtitle: 'Automatically adapts to your system theme.',
+                ss1Title: 'Add Autostart Entry',
+                ss1Desc: 'Create new entries from installed applications or with a custom command.',
+                installTitle: 'Installation',
+                installSubtitle: 'Boot Mate is available as a Flatpak.',
+                step1: 'Add the repository',
+                step2: 'Install Boot Mate',
+                step3: 'Launch',
+                copy: 'Copy',
+                copied: 'Copied!'
+            }
+        };
+
+        function getLang() {
+            const langs = navigator.languages || [navigator.language];
+            for (const l of langs) {
+                if (l.startsWith('de')) return 'de';
+                if (l.startsWith('en')) return 'en';
+            }
+            return 'en';
+        }
+
+        const lang = getLang();
+        const t = i18n[lang];
+        document.documentElement.lang = lang;
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (t[key]) el.textContent = t[key];
+        });
+
+        function copy(btn) {
+            const code = btn.closest('.code-block').querySelector('code').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = t.copied;
+                setTimeout(() => btn.textContent = t.copy, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

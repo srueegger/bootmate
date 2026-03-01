@@ -28,6 +28,11 @@
 distrobox enter bootmate-dev -- /var/home/srueegger/Projects/flatpak.rueegger.dev/publish.sh bootmate
 ```
 
+### GitHub Pages
+- Project website served from `docs/` folder on `main` branch
+- Dual-language (DE/EN) with automatic browser detection
+- Dark/light mode via `prefers-color-scheme`
+
 ## Distrobox Usage
 When you need Rust/Cargo or build tools, create a distrobox:
 ```bash
