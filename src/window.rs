@@ -93,7 +93,13 @@ impl BootMateWindow {
             })
             .build();
 
-        self.add_action_entries([action_refresh, action_add_entry]);
+        let action_show_shortcuts = gio::ActionEntry::builder("show-shortcuts")
+            .activate(|window: &Self, _, _| {
+                window.show_shortcuts();
+            })
+            .build();
+
+        self.add_action_entries([action_refresh, action_add_entry, action_show_shortcuts]);
     }
 
     pub fn load_autostart_entries(&self) {
@@ -356,6 +362,14 @@ impl BootMateWindow {
             ),
         );
 
+        dialog.present(Some(self));
+    }
+
+    fn show_shortcuts(&self) {
+        let builder = gtk::Builder::from_resource("/me/rueegger/bootmate/ui/shortcuts.ui");
+        let dialog = builder
+            .object::<adw::ShortcutsDialog>("shortcuts_dialog")
+            .unwrap();
         dialog.present(Some(self));
     }
 

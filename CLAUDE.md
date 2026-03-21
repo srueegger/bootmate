@@ -12,7 +12,7 @@
 
 ## Build System
 - Meson + Cargo (Rust)
-- Dependencies: GTK4 >= 4.10, libadwaita >= 1.5, glib >= 2.66
+- Dependencies: GTK4 >= 4.22.1, libadwaita >= 1.9.0, glib >= 2.66
 - Build: `meson setup build --prefix=/usr -Dprofile=release && meson compile -C build`
 
 ## Distribution

@@ -2,5 +2,6 @@
 <gresources>
   <gresource prefix="/me/rueegger/bootmate">
     <file compressed="true" preprocess="xml-stripblanks">ui/window.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/shortcuts.ui</file>
   </gresource>
 </gresources>

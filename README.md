@@ -66,8 +66,8 @@ If you prefer to build from source, see the [Building](#building) section below.
 
 ### Runtime Dependencies
 
-- GTK 4.10 or later
-- libadwaita 1.5 or later
+- GTK 4.22.1 or later
+- libadwaita 1.9.0 or later
 - GLib 2.66 or later
 
 ### Build Dependencies

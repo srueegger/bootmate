@@ -29,12 +29,34 @@ mod imp {
             obj.setup_gactions();
             obj.set_accels_for_action("app.quit", &["<primary>q"]);
             obj.set_accels_for_action("window.close", &["<primary>w"]);
+            obj.set_accels_for_action("win.add-entry", &["<primary>n"]);
+            obj.set_accels_for_action("win.refresh", &["<primary>r"]);
+            obj.set_accels_for_action("win.show-shortcuts", &["<primary>question"]);
         }
     }
 
     impl ApplicationImpl for BootMateApplication {
         fn activate(&self) {
             let application = self.obj();
+
+            // In Flatpak, GTK's icon theme doesn't include host icon paths.
+            // Add them so that named icons from host apps resolve correctly.
+            if std::env::var("FLATPAK_ID").is_ok() {
+                if let Some(display) = gtk::gdk::Display::default() {
+                    let icon_theme = gtk::IconTheme::for_display(&display);
+                    icon_theme.add_search_path("/run/host/usr/share/icons");
+                    icon_theme.add_search_path("/run/host/usr/share/pixmaps");
+                    // System Flatpak app icons
+                    icon_theme.add_search_path("/var/lib/flatpak/exports/share/icons");
+                    // User Flatpak app icons
+                    if let Ok(home) = std::env::var("HOME") {
+                        icon_theme.add_search_path(format!(
+                            "{}/.local/share/flatpak/exports/share/icons", home
+                        ));
+                    }
+                }
+            }
+
             let window = if let Some(window) = application.active_window() {
                 window
             } else {
