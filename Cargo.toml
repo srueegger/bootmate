@@ -1,7 +1,7 @@
 [package]
 name = "bootmate"
 version = "50.0.0"
-edition = "2021"
+edition = "2024"
 license = "GPL-2.0-only"
 authors = ["Samuel Rüegger"]
 description = "A simple GTK4/Libadwaita application to manage autostart entries"
