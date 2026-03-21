@@ -17,7 +17,7 @@ gio = "0.22"
 
 [package.metadata.deb]
 maintainer = "Samuel Rüegger"
-copyright = "2025, Samuel Rüegger <mail@example.com>"
+copyright = "2025, Samuel Rüegger <samuel@rueegger.me>"
 extended-description = """\
 Boot Mate is a modern GTK4/Libadwaita application for managing autostart entries on Linux.
 It allows you to easily add, edit, and remove applications that start automatically when you log in.
