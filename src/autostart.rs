@@ -43,6 +43,7 @@ impl AutostartEntry {
         let mut comment = None;
         let mut enabled = true;
         let mut in_desktop_entry = false;
+        let mut flatpak_id = None;
 
         for line in content.lines() {
             let line = line.trim();
@@ -65,6 +66,12 @@ impl AutostartEntry {
                     "Exec" => exec = Some(value.to_string()),
                     "Icon" => icon = Some(value.to_string()),
                     "Comment" => comment = Some(value.to_string()),
+                    "X-Flatpak" => flatpak_id = Some(value.to_string()),
+                    "X-XDP-Autostart" => {
+                        if flatpak_id.is_none() {
+                            flatpak_id = Some(value.to_string());
+                        }
+                    }
                     "X-GNOME-Autostart-enabled" => {
                         enabled = value.to_lowercase() != "false";
                     }
@@ -80,6 +87,16 @@ impl AutostartEntry {
 
         let name = name.ok_or("Missing Name field")?;
         let exec = exec.ok_or("Missing Exec field")?;
+
+        // If no Icon= was set, derive from X-Flatpak/X-XDP-Autostart ID,
+        // then fall back to the filename stem (works for most Flatpak-generated entries)
+        if icon.is_none() {
+            if let Some(id) = flatpak_id {
+                icon = Some(id);
+            } else if let Some(stem) = path.file_stem().and_then(|s| s.to_str()) {
+                icon = Some(stem.to_string());
+            }
+        }
 
         let is_user_entry = path.to_string_lossy().contains(".config/autostart");
 
