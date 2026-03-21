@@ -2,166 +2,96 @@
 
 Diese Anleitung beschreibt den kompletten Prozess zum Veröffentlichen einer neuen Version von Boot Mate.
 
-## Übersicht
-
-Bei jedem Release werden automatisch über GitHub Actions DEB-Pakete gebaut:
-- **DEB-Paket** (`bootmate_X.Y.Z_amd64.deb`)
-- **DEB-Paket ARM64** (`bootmate_X.Y.Z_arm64.deb`)
-
-Diese werden als Release Assets auf GitHub bereitgestellt.
-
 ---
 
 ## 📋 Release-Prozess (Schritt für Schritt)
 
 ### 1. Versionsnummer aktualisieren
 
-Die Version muss in folgenden Dateien angepasst werden:
-
-- `Cargo.toml` (Zeile 3)
-- `meson.build` (Zeile 4)
-- `po/en.po` (Zeile 8)
-- `po/de.po` (Zeile 8)
-- `data/me.rueegger.bootmate.metainfo.xml.in` (Zeile 28 - Version UND Datum)
-
-**Beispiel für Version 1.1.0:**
-
 ```bash
-# In allen Dateien 1.0.0 → 1.1.0 ersetzen
-# Datum in metainfo.xml.in aktualisieren
+./update-version.sh 50.1
 ```
 
-### 2. Release-Notizen in metainfo.xml.in
+Das Script aktualisiert automatisch:
+- `meson.build`
+- `Cargo.toml` (als X.Y.0 für SemVer)
+- `po/en.po` und `po/de.po`
+- `data/me.rueegger.bootmate.metainfo.xml.in` (Version + Datum)
+
+### 2. Changelog in metainfo.xml.in schreiben
 
 Aktualisiere die Release-Beschreibung in `data/me.rueegger.bootmate.metainfo.xml.in`:
 
 ```xml
-<release version="1.1.0" date="2025-12-15">
+<release version="50.1" date="2026-XX-XX">
   <description>
-    <p>Neue Features und Verbesserungen</p>
+    <p>Kurze Beschreibung</p>
     <ul>
       <li>Feature 1</li>
-      <li>Feature 2</li>
-      <li>Bugfix 3</li>
+      <li>Bugfix 2</li>
     </ul>
   </description>
 </release>
 ```
 
-### 3. Änderungen committen
+### 3. cargo-sources.json aktualisieren
+
+Falls sich Rust-Abhängigkeiten geändert haben:
+
+```bash
+cargo update
+python3 ~/Projects/me.rueegger.cargo/flatpak-cargo-generator.py Cargo.lock -o cargo-sources.json
+```
+
+### 4. Lokal testen (Flatpak)
+
+```bash
+flatpak-builder --user --install --force-clean --disable-rofiles-fuse _flatpak me.rueegger.bootmate.yml
+flatpak run me.rueegger.bootmate
+```
+
+### 5. Änderungen committen und pushen
 
 ```bash
 git add .
-git commit -m "Bump version to X.Y.Z"
+git commit -m "Bump version to 50.1"
+git push
 ```
 
-### 4. Release-Branch erstellen (optional)
-
-Für größere Releases empfiehlt sich ein Release-Branch:
+### 6. Tag erstellen und pushen
 
 ```bash
-git checkout -b release-X.Y.Z
-git push -u origin release-X.Y.Z
+git tag -a v50.1 -m "Release version 50.1"
+git push origin v50.1
 ```
 
-Dann Pull Request erstellen und nach Review in `main` mergen.
-
-### 5. Tag erstellen und pushen
+### 7. Flatpak veröffentlichen
 
 ```bash
-# Auf main branch wechseln
-git checkout main
-git pull
-
-# Tag erstellen
-git tag -a vX.Y.Z -m "Release version X.Y.Z"
-
-# Tag pushen
-git push origin vX.Y.Z
+~/Projects/flatpak.rueegger.dev/publish.sh bootmate
 ```
 
-### 6. GitHub Release erstellen
+### 8. GitHub Release erstellen
 
 1. Gehe zu: https://github.com/srueegger/bootmate/releases
 2. Klicke auf **"Draft a new release"**
-3. Wähle den Tag: `vX.Y.Z`
-4. Release Title: `Boot Mate X.Y.Z`
+3. Wähle den Tag: `v50.1`
+4. Release Title: `Boot Mate 50.1`
 5. Beschreibung mit Features/Fixes
 6. Klicke auf **"Publish release"**
-
-### 7. GitHub Actions läuft automatisch
-
-Nach dem Veröffentlichen des Releases:
-
-1. GitHub Actions startet automatisch (`.github/workflows/release.yml`)
-2. Baut DEB-Pakete für AMD64 und ARM64 mit `cargo deb`
-3. Lädt die Pakete als Release Assets hoch
-
-**Status überprüfen:**
-- Gehe zu **Actions** Tab auf GitHub
-- Sieh dir den "Build and Release" Workflow an
-
-**Nach erfolgreichem Build:**
-- Die Pakete erscheinen automatisch unter dem Release
-
----
-
-## 🔧 Troubleshooting
-
-### GitHub Actions Build schlägt fehl
-
-**DEB Build Fehler:**
-- Überprüfe `Cargo.toml` `[package.metadata.deb]` Sektion
-- Stelle sicher, dass `build-release` Verzeichnis korrekt ist
-- Überprüfe, ob alle Build-Dependencies installiert sind
-
----
-
-## 📊 Status überprüfen
-
-### GitHub Release Assets
-
-Gehe zu: https://github.com/srueegger/bootmate/releases/tag/vX.Y.Z
-
-Erwartete Assets:
-- ✅ `bootmate_X.Y.Z_amd64.deb`
-- ✅ `bootmate_X.Y.Z_arm64.deb`
 
 ---
 
 ## 🎯 Checkliste für Release
 
-- [ ] Version in allen Dateien aktualisiert
-- [ ] Release-Notizen in metainfo.xml.in geschrieben
-- [ ] Änderungen committed
+- [ ] Versionsnummer aktualisiert (`./update-version.sh X.Y`)
+- [ ] Changelog in `metainfo.xml.in` geschrieben
+- [ ] `cargo-sources.json` aktualisiert (falls Abhängigkeiten geändert)
+- [ ] Lokaler Flatpak-Build erfolgreich
+- [ ] Änderungen committed und gepusht
 - [ ] Tag erstellt und gepusht
-- [ ] GitHub Release veröffentlicht
-- [ ] GitHub Actions erfolgreich durchgelaufen
-- [ ] Release Assets vorhanden (DEB für AMD64 und ARM64)
-
----
-
-## 📝 Wichtige Notizen
-
-### Automatische Builds
-
-- **DEB**: Wird mit `cargo deb` gebaut (nutzt Cargo.toml Konfiguration)
-- **Architekturen**: AMD64 und ARM64
-- **Trigger**: Automatisch bei Release-Veröffentlichung ODER manuell via "Actions" Tab
-
-### Sandbox Permissions
-
-Die App zeigt ein Banner an, wenn Flatpak-Berechtigungen nicht gesetzt sind:
-
-- **Flatpak**: Zeigt `flatpak override` Befehle
-
-### Versionierung
-
-Boot Mate folgt Semantic Versioning:
-- **MAJOR.MINOR.PATCH** (z.B. 1.2.3)
-- MAJOR: Breaking Changes
-- MINOR: Neue Features (backwards compatible)
-- PATCH: Bugfixes
+- [ ] Flatpak veröffentlicht (`publish.sh bootmate`)
+- [ ] GitHub Release erstellt
 
 ---
 
@@ -169,9 +99,18 @@ Boot Mate folgt Semantic Versioning:
 
 - **GitHub Repository:** https://github.com/srueegger/bootmate
 - **GitHub Releases:** https://github.com/srueegger/bootmate/releases
-- **GitHub Actions:** https://github.com/srueegger/bootmate/actions
+- **Flatpak Repository:** https://flatpak.rueegger.dev
 
 ---
 
-**Letzte Aktualisierung:** 2026-02-21
-**Aktuelle Version:** 1.3.1
+### Versionierung
+
+Boot Mate folgt dem GNOME-Versionsschema:
+- **MAJOR.MINOR** (z.B. 50.0, 50.1)
+- MAJOR: GNOME-Version (50 = GNOME 50)
+- MINOR: Releases innerhalb des GNOME-Zyklus
+
+---
+
+**Letzte Aktualisierung:** 2026-03-21
+**Aktuelle Version:** 50.0

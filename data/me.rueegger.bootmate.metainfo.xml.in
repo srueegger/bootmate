@@ -34,10 +34,16 @@
   <releases>
     <release version="50.0" date="2026-03-21">
       <description>
-        <p>Flatpak bugfixes</p>
+        <p>Major update aligning with GNOME 50</p>
         <ul>
-          <li>Fix user autostart entries not showing in Flatpak sandbox</li>
-          <li>Fix translations not loading in Flatpak</li>
+          <li>Updated to GNOME 50 runtime and SDK</li>
+          <li>Updated GTK4 to 4.22.1 and libadwaita to 1.9.0</li>
+          <li>Improved app icon resolution: icons for Flatpak apps (e.g. from X-Flatpak entries) now display correctly</li>
+          <li>Icons specified as absolute paths in .desktop files are now handled correctly</li>
+          <li>Host icon paths are now included in Flatpak sandbox for correct icon display</li>
+          <li>Added keyboard shortcut Ctrl+N to add a new autostart entry</li>
+          <li>Added keyboard shortcut Ctrl+R to refresh the list</li>
+          <li>Added keyboard shortcuts overview dialog (Ctrl+?)</li>
         </ul>
       </description>
     </release>
