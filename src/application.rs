@@ -35,6 +35,17 @@ mod imp {
     impl ApplicationImpl for BootMateApplication {
         fn activate(&self) {
             let application = self.obj();
+
+            // In Flatpak, GTK's icon theme doesn't include host icon paths.
+            // Add them so that named icons from host apps resolve correctly.
+            if std::env::var("FLATPAK_ID").is_ok() {
+                if let Some(display) = gtk::gdk::Display::default() {
+                    let icon_theme = gtk::IconTheme::for_display(&display);
+                    icon_theme.add_search_path("/run/host/usr/share/icons");
+                    icon_theme.add_search_path("/run/host/usr/share/pixmaps");
+                }
+            }
+
             let window = if let Some(window) = application.active_window() {
                 window
             } else {

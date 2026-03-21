@@ -63,11 +63,26 @@ impl EntryRow {
         prefix_box.append(&enable_switch);
 
         // Set icon with larger size
-        let icon = if let Some(icon_name) = &entry.icon {
-            gtk::Image::builder()
-                .icon_name(icon_name)
-                .pixel_size(32)
-                .build()
+        let icon = if let Some(icon_str) = &entry.icon {
+            if icon_str.starts_with('/') {
+                // Absolute path: in Flatpak, also try the host-prefixed path
+                let path = if std::path::Path::new(icon_str.as_str()).exists() {
+                    icon_str.clone()
+                } else if std::env::var("FLATPAK_ID").is_ok() {
+                    format!("/run/host{}", icon_str)
+                } else {
+                    icon_str.clone()
+                };
+                gtk::Image::builder()
+                    .file(&path)
+                    .pixel_size(32)
+                    .build()
+            } else {
+                gtk::Image::builder()
+                    .icon_name(icon_str)
+                    .pixel_size(32)
+                    .build()
+            }
         } else {
             gtk::Image::builder()
                 .icon_name("application-x-executable")
