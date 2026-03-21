@@ -46,6 +46,14 @@ mod imp {
                     let icon_theme = gtk::IconTheme::for_display(&display);
                     icon_theme.add_search_path("/run/host/usr/share/icons");
                     icon_theme.add_search_path("/run/host/usr/share/pixmaps");
+                    // System Flatpak app icons
+                    icon_theme.add_search_path("/var/lib/flatpak/exports/share/icons");
+                    // User Flatpak app icons
+                    if let Ok(home) = std::env::var("HOME") {
+                        icon_theme.add_search_path(format!(
+                            "{}/.local/share/flatpak/exports/share/icons", home
+                        ));
+                    }
                 }
             }
 

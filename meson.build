@@ -1,7 +1,7 @@
 project(
   'bootmate',
   'rust',
-  version: '1.3.1',
+  version: '50.0',
   license: 'GPL-2.0-only',
   meson_version: '>= 0.59.0',
 )

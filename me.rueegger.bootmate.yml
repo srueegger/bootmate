@@ -18,6 +18,9 @@ finish-args:
   - --filesystem=host-etc:ro
   # Read-only access to host /usr (for applications, icons, gnome autostart, mounted at /run/host/usr)
   - --filesystem=host-os:ro
+  # Read-only access to Flatpak exports for app icons
+  - --filesystem=/var/lib/flatpak/exports/share/icons:ro
+  - --filesystem=xdg-data/flatpak/exports/share/icons:ro
 
 build-options:
   append-path: /usr/lib/sdk/rust-stable/bin

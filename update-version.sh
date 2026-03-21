@@ -5,15 +5,16 @@ set -e
 
 if [ -z "$1" ]; then
     echo "Usage: ./update-version.sh <new-version>"
+    echo "Example: ./update-version.sh 50.0"
     echo "Example: ./update-version.sh 1.2.0"
     exit 1
 fi
 
 NEW_VERSION="$1"
 
-# Validate version format (X.Y.Z)
-if ! [[ "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "Error: Version must be in format X.Y.Z (e.g., 1.2.0)"
+# Validate version format (X.Y or X.Y.Z)
+if ! [[ "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+    echo "Error: Version must be in format X.Y or X.Y.Z (e.g., 50.0 or 1.2.0)"
     exit 1
 fi
 
@@ -21,33 +22,28 @@ echo "Updating version to $NEW_VERSION..."
 
 # Update meson.build
 echo "  - meson.build"
-sed -i "s/version: '[0-9]\+\.[0-9]\+\.[0-9]\+'/version: '$NEW_VERSION'/" meson.build
+sed -i "s/version: '[0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?'/version: '$NEW_VERSION'/" meson.build
 
-# Update Cargo.toml
+# Update Cargo.toml (requires 3-component semver, append .0 for X.Y versions)
 echo "  - Cargo.toml"
-sed -i "s/^version = \"[0-9]\+\.[0-9]\+\.[0-9]\+\"/version = \"$NEW_VERSION\"/" Cargo.toml
+if [[ "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+$ ]]; then
+    CARGO_VERSION="${NEW_VERSION}.0"
+else
+    CARGO_VERSION="$NEW_VERSION"
+fi
+sed -i "s/^version = \"[0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?\"/version = \"$CARGO_VERSION\"/" Cargo.toml
 
 # Update po files
 echo "  - po/en.po"
-sed -i "s/Project-Id-Version: bootmate [0-9]\+\.[0-9]\+\.[0-9]\+/Project-Id-Version: bootmate $NEW_VERSION/" po/en.po
+sed -i "s/Project-Id-Version: bootmate [0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?/Project-Id-Version: bootmate $NEW_VERSION/" po/en.po
 
 echo "  - po/de.po"
-sed -i "s/Project-Id-Version: bootmate [0-9]\+\.[0-9]\+\.[0-9]\+/Project-Id-Version: bootmate $NEW_VERSION/" po/de.po
+sed -i "s/Project-Id-Version: bootmate [0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?/Project-Id-Version: bootmate $NEW_VERSION/" po/de.po
 
 # Update metainfo.xml.in - only update the first (newest) release version
 echo "  - data/me.rueegger.bootmate.metainfo.xml.in"
-# Get current date in YYYY-MM-DD format
 CURRENT_DATE=$(date +%Y-%m-%d)
-# Update only the first occurrence of release version
-sed -i "0,/<release version=\"[0-9]\+\.[0-9]\+\.[0-9]\+\"/s/<release version=\"[0-9]\+\.[0-9]\+\.[0-9]\+\" date=\"[^\"]*\">/<release version=\"$NEW_VERSION\" date=\"$CURRENT_DATE\">/" data/me.rueegger.bootmate.metainfo.xml.in
-
-# Update RELEASE.md
-echo "  - RELEASE.md"
-sed -i "s/\*\*Aktuelle Version:\*\* [0-9]\+\.[0-9]\+\.[0-9]\+/**Aktuelle Version:** $NEW_VERSION/" RELEASE.md
-
-# Update bootmate.spec
-echo "  - bootmate.spec"
-sed -i "s/^Version:        [0-9]\+\.[0-9]\+\.[0-9]\+/Version:        $NEW_VERSION/" bootmate.spec
+sed -i "0,/<release version=\"[0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?\"/s/<release version=\"[0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?\" date=\"[^\"]*\">/<release version=\"$NEW_VERSION\" date=\"$CURRENT_DATE\">/" data/me.rueegger.bootmate.metainfo.xml.in
 
 echo ""
 echo "Version updated to $NEW_VERSION successfully!"
@@ -58,8 +54,6 @@ echo "  - Cargo.toml"
 echo "  - po/en.po"
 echo "  - po/de.po"
 echo "  - data/me.rueegger.bootmate.metainfo.xml.in (version and date)"
-echo "  - RELEASE.md"
-echo "  - bootmate.spec"
 echo ""
 echo "Next steps:"
 echo "  1. Review changes: git diff"
