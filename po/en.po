@@ -47,13 +47,45 @@ msgstr "No Autostart Entries"
 msgid "No applications are configured to start automatically"
 msgstr "No applications are configured to start automatically"
 
+#: data/ui/window.ui
+msgid "Add Autostart Entry (Ctrl+N)"
+msgstr "Add Autostart Entry (Ctrl+N)"
+
 #: data/ui/window.ui:67
 msgid "_Refresh"
 msgstr "_Refresh"
 
+#: data/ui/window.ui
+msgid "_Keyboard Shortcuts"
+msgstr "_Keyboard Shortcuts"
+
 #: data/ui/window.ui:73
 msgid "_About Boot Mate"
 msgstr "_About Boot Mate"
+
+#: data/ui/shortcuts.ui
+msgid "General"
+msgstr "General"
+
+#: data/ui/shortcuts.ui
+msgid "Keyboard Shortcuts"
+msgstr "Keyboard Shortcuts"
+
+#: data/ui/shortcuts.ui
+msgid "Quit"
+msgstr "Quit"
+
+#: data/ui/shortcuts.ui
+msgid "Autostart"
+msgstr "Autostart"
+
+#: data/ui/shortcuts.ui
+msgid "Add New Entry"
+msgstr "Add New Entry"
+
+#: data/ui/shortcuts.ui
+msgid "Refresh"
+msgstr "Refresh"
 
 #: src/entry_row.rs
 msgid "Edit"

@@ -11,7 +11,7 @@
             <child type="start">
               <object class="GtkButton">
                 <property name="icon-name">list-add-symbolic</property>
-                <property name="tooltip-text" translatable="yes">Add Autostart Entry</property>
+                <property name="tooltip-text" translatable="yes">Add Autostart Entry (Ctrl+N)</property>
                 <property name="action-name">win.add-entry</property>
                 <style>
                   <class name="flat"/>
@@ -169,6 +169,10 @@
       </item>
     </section>
     <section>
+      <item>
+        <attribute name="label" translatable="yes">_Keyboard Shortcuts</attribute>
+        <attribute name="action">win.show-shortcuts</attribute>
+      </item>
       <item>
         <attribute name="label" translatable="yes">_About Boot Mate</attribute>
         <attribute name="action">app.about</attribute>

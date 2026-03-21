@@ -29,6 +29,9 @@ mod imp {
             obj.setup_gactions();
             obj.set_accels_for_action("app.quit", &["<primary>q"]);
             obj.set_accels_for_action("window.close", &["<primary>w"]);
+            obj.set_accels_for_action("win.add-entry", &["<primary>n"]);
+            obj.set_accels_for_action("win.refresh", &["<primary>r"]);
+            obj.set_accels_for_action("win.show-shortcuts", &["<primary>question"]);
         }
     }
 
