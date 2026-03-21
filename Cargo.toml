@@ -9,11 +9,11 @@ homepage = "https://github.com/srueegger/bootmate"
 repository = "https://github.com/srueegger/bootmate"
 
 [dependencies]
-gtk = { version = "0.10", package = "gtk4", features = ["v4_12"] }
-libadwaita = { version = "0.8", features = ["v1_5"] }
+gtk = { version = "0.11", package = "gtk4", features = ["v4_22"] }
+libadwaita = { version = "0.9", features = ["v1_9"] }
 gettext-rs = { version = "0.7", features = ["gettext-system"] }
-glib = "0.21"
-gio = "0.21"
+glib = "0.22"
+gio = "0.22"
 
 [package.metadata.deb]
 maintainer = "Samuel Rüegger"
