@@ -33,8 +33,8 @@ Host-side `meson`/`cargo`/`flatpak-builder` invocations are intentionally not us
 ## Distribution
 - **Flatpak is the only distribution method** (no DEB, no RPM)
 - Own Flatpak repository at `https://flatpak.rueegger.dev`
-- Repository project: `~/Projects/flatpak.rueegger.dev`
-- Publish script: `~/Projects/flatpak.rueegger.dev/publish.sh`
+- Repository project: `~/Sites/flatpak.rueegger.dev`
+- Publish script: `~/Sites/flatpak.rueegger.dev/publish.sh`
 - GPG Key ID: `A597D880A0505622AA55A6CB0718DBE47E8CA409`
 - Server: `scifitre@flatpak.rueegger.dev` (cPanel shared hosting, Apache, static files only)
 
@@ -42,7 +42,7 @@ Host-side `meson`/`cargo`/`flatpak-builder` invocations are intentionally not us
 The publish script runs on the host (it needs the signing key and rsync/SSH setup). The build itself happens inside the container — the publish script invokes `scripts/devbox-flatpak.sh` under the hood.
 
 ```bash
-~/Projects/flatpak.rueegger.dev/publish.sh bootmate
+~/Sites/flatpak.rueegger.dev/publish.sh bootmate
 ```
 
 ### GitHub Pages
