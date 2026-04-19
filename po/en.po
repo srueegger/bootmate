@@ -1,7 +1,7 @@
 # English translation for Boot Mate.
 # Copyright (C) 2025 Samuel Rüegger
 # This file is distributed under the same license as the bootmate package.
-# Samuel Rüegger <mail@samuelrueegger.ch>, 2025.
+# Samuel Rüegger <samuel@rueegger.me>, 2025.
 #
 msgid ""
 msgstr ""
@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-01-28 12:00+0100\n"
 "PO-Revision-Date: 2025-01-28 12:00+0100\n"
-"Last-Translator: Samuel Rüegger <mail@samuelrueegger.ch>\n"
+"Last-Translator: Samuel Rüegger <samuel@rueegger.me>\n"
 "Language-Team: English\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
