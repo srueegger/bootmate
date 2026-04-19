@@ -72,51 +72,57 @@ If you prefer to build from source, see the [Building](#building) section below.
 
 ### Build Dependencies
 
-- Rust 1.70 or later (1.80+ recommended)
-- Meson 0.59 or later
-- Cargo
-- glib-compile-resources
-- gettext
+All build dependencies are provisioned inside a dedicated [Distrobox](https://distrobox.it/) container
+named `bootmate-devsystem` (Fedora 44 with GNOME 50 / libadwaita 1.9). The host only needs Distrobox
+and a container runtime (Podman or Docker).
 
 ## Building
 
-### Using Meson (Recommended)
+The repository ships helper scripts that execute every build step inside the container,
+so the host stays untouched.
+
+### One-time setup
 
 ```bash
-# Configure the build
-meson setup build --prefix=/usr/local
-
-# Build the application
-meson compile -C build
-
-# Install (optional)
-sudo meson install -C build
+scripts/devbox-setup.sh
 ```
 
-### Development Build
+This creates the `bootmate-devsystem` container from
+[.distrobox/bootmate-devsystem.ini](.distrobox/bootmate-devsystem.ini), runs a full
+`dnf upgrade --refresh`, and installs the Meson + Rust + flatpak-builder toolchain inside it.
 
-For development with debug symbols:
+To refresh packages later:
 
 ```bash
-meson setup build -Dprofile=debug
-meson compile -C build
+scripts/devbox-update.sh
 ```
 
-### Release Build
-
-For optimized release build:
+### Development build
 
 ```bash
-meson setup build -Dprofile=release
-meson compile -C build
+scripts/devbox-build.sh             # debug build in ./build
+scripts/devbox-run.sh               # run ./build/src/bootmate
 ```
 
-### Flatpak Build
-
-To build as a Flatpak locally:
+### Release build
 
 ```bash
-flatpak-builder --user --install --force-clean --disable-rofiles-fuse _flatpak me.rueegger.bootmate.yml
+scripts/devbox-build.sh release     # release build in ./build-release
+```
+
+### Local Flatpak test build
+
+```bash
+scripts/devbox-flatpak.sh
+```
+
+All flatpak-builder state (state dir, OSTree repo, user installation) lives under
+`/var/cache/bootmate-flatpak/` **inside the container** — the host `$HOME` is never polluted.
+
+### Interactive shell
+
+```bash
+scripts/devbox-enter.sh
 ```
 
 ## Running
