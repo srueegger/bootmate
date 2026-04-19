@@ -1,6 +1,6 @@
 [package]
 name = "bootmate"
-version = "50.0.0"
+version = "50.1.0"
 edition = "2024"
 license = "GPL-2.0-only"
 authors = ["Samuel Rüegger"]
