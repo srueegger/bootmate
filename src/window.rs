@@ -200,7 +200,15 @@ impl BootMateWindow {
         // Program dropdown (initially visible)
         let program_row = adw::ComboRow::builder()
             .title(gettext("Application"))
+            .enable_search(true)
             .build();
+
+        // Tell the filter which property of each StringObject to match against.
+        program_row.set_expression(Some(&gtk::PropertyExpression::new(
+            gtk::StringObject::static_type(),
+            gtk::Expression::NONE,
+            "string",
+        )));
 
         // Load available .desktop files from applications directory (host-aware)
         let programs = gtk::StringList::new(&[]);

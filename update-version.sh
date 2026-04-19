@@ -40,10 +40,39 @@ sed -i "s/Project-Id-Version: bootmate [0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?/Project-I
 echo "  - po/de.po"
 sed -i "s/Project-Id-Version: bootmate [0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?/Project-Id-Version: bootmate $NEW_VERSION/" po/de.po
 
-# Update metainfo.xml.in - only update the first (newest) release version
+# Update metainfo.xml.in - prepend a new release stub; never touch older entries
 echo "  - data/me.rueegger.bootmate.metainfo.xml.in"
 CURRENT_DATE=$(date +%Y-%m-%d)
-sed -i "0,/<release version=\"[0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?\"/s/<release version=\"[0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?\" date=\"[^\"]*\">/<release version=\"$NEW_VERSION\" date=\"$CURRENT_DATE\">/" data/me.rueegger.bootmate.metainfo.xml.in
+METAINFO="data/me.rueegger.bootmate.metainfo.xml.in"
+
+if grep -q "<release version=\"$NEW_VERSION\"" "$METAINFO"; then
+    echo "    (release $NEW_VERSION already present — leaving changelog untouched)"
+else
+    python3 - "$NEW_VERSION" "$CURRENT_DATE" "$METAINFO" <<'PYEOF'
+import sys
+version, date, path = sys.argv[1], sys.argv[2], sys.argv[3]
+with open(path, 'r', encoding='utf-8') as f:
+    content = f.read()
+marker = '<releases>'
+idx = content.find(marker)
+if idx == -1:
+    sys.exit(f"<releases> tag not found in {path}")
+insert_at = idx + len(marker)
+stub = (
+    f"\n    <release version=\"{version}\" date=\"{date}\">\n"
+    f"      <description>\n"
+    f"        <p>TODO: short summary</p>\n"
+    f"        <ul>\n"
+    f"          <li>TODO: changelog entry</li>\n"
+    f"        </ul>\n"
+    f"      </description>\n"
+    f"    </release>"
+)
+with open(path, 'w', encoding='utf-8') as f:
+    f.write(content[:insert_at] + stub + content[insert_at:])
+PYEOF
+    echo "    (prepended release $NEW_VERSION stub — fill in the <li> entries)"
+fi
 
 echo ""
 echo "Version updated to $NEW_VERSION successfully!"
@@ -53,9 +82,9 @@ echo "  - meson.build"
 echo "  - Cargo.toml"
 echo "  - po/en.po"
 echo "  - po/de.po"
-echo "  - data/me.rueegger.bootmate.metainfo.xml.in (version and date)"
+echo "  - data/me.rueegger.bootmate.metainfo.xml.in (new release stub prepended)"
 echo ""
 echo "Next steps:"
-echo "  1. Review changes: git diff"
-echo "  2. Add release notes to data/me.rueegger.bootmate.metainfo.xml.in"
+echo "  1. Fill in the TODO changelog entries in data/me.rueegger.bootmate.metainfo.xml.in"
+echo "  2. Review changes: git diff"
 echo "  3. Commit: git add . && git commit -m 'Bump version to $NEW_VERSION'"

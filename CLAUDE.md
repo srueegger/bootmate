@@ -3,17 +3,32 @@
 ## Environment
 - Host OS: Ubuntu
 - IDE: RustRover
-- Rust toolchain: rustup (installed in `~/.cargo` / `~/.rustup`)
-- Build dependencies installed directly via apt
+- **All builds run inside the `bootmate-devsystem` Distrobox container** (Fedora 44, GNOME 50, libadwaita 1.9+). The host does not need any build dependencies.
 
 ## App Identity
 - App ID: `me.rueegger.bootmate` (domain: rueegger.me)
 - Previously was `ch.srueegger.bootmate` - changed for domain verification
 
 ## Build System
-- Meson + Cargo (Rust)
+- Meson + Cargo (Rust edition 2024)
 - Dependencies: GTK4 >= 4.22.1, libadwaita >= 1.9.0, glib >= 2.66
-- Build: `meson setup build --prefix=/usr -Dprofile=release && meson compile -C build`
+
+### Distrobox workflow
+The container definition lives in [.distrobox/bootmate-devsystem.ini](.distrobox/bootmate-devsystem.ini). Thin wrapper scripts in [scripts/](scripts/) execute commands inside the container:
+
+```bash
+scripts/devbox-setup.sh            # one-time: create the container (runs dnf upgrade on init)
+scripts/devbox-build.sh            # meson compile (debug)
+scripts/devbox-build.sh release    # meson compile (release)
+scripts/devbox-run.sh              # run the compiled binary
+scripts/devbox-flatpak.sh          # local flatpak-builder test build
+scripts/devbox-update.sh           # dnf upgrade --refresh inside the box
+scripts/devbox-enter.sh            # interactive shell inside the box
+```
+
+All test-flatpak state (state dir, OSTree repo, flatpak-builder build dir, per-user flatpak installation) lives under `/var/cache/bootmate-flatpak/` **inside the container** — nothing lands in the host `$HOME`.
+
+Host-side `meson`/`cargo`/`flatpak-builder` invocations are intentionally not used any more.
 
 ## Distribution
 - **Flatpak is the only distribution method** (no DEB, no RPM)
@@ -24,6 +39,8 @@
 - Server: `scifitre@flatpak.rueegger.dev` (cPanel shared hosting, Apache, static files only)
 
 ### Publishing a new version
+The publish script runs on the host (it needs the signing key and rsync/SSH setup). The build itself happens inside the container — the publish script invokes `scripts/devbox-flatpak.sh` under the hood.
+
 ```bash
 ~/Projects/flatpak.rueegger.dev/publish.sh bootmate
 ```
@@ -32,11 +49,6 @@
 - Project website served from `docs/` folder on `main` branch
 - Dual-language (DE/EN) with automatic browser detection
 - Dark/light mode via `prefers-color-scheme`
-
-## Build Dependencies (Ubuntu)
-```bash
-sudo apt install meson gcc libgtk-4-dev libadwaita-1-dev libglib2.0-dev gettext desktop-file-utils libappstream-glib-dev
-```
 
 ## Git Commits
 - No traces of Claude/AI must be visible in git commits

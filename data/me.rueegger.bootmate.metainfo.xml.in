@@ -32,6 +32,15 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="50.1" date="2026-04-19">
+      <description>
+        <p>Quality of life improvements</p>
+        <ul>
+          <li>The application picker in the "Add Autostart Entry" dialog is now searchable — just start typing to filter the list instead of scrolling</li>
+          <li>Development workflow moved to a dedicated Distrobox container (Fedora 44 with GNOME 50) — local meson and Flatpak test builds no longer touch the host system</li>
+        </ul>
+      </description>
+    </release>
     <release version="50.0" date="2026-03-21">
       <description>
         <p>Major update aligning with GNOME 50</p>
