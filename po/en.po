@@ -5,7 +5,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: bootmate 50.1\n"
+"Project-Id-Version: bootmate 51.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-01-28 12:00+0100\n"
 "PO-Revision-Date: 2025-01-28 12:00+0100\n"
@@ -142,18 +142,6 @@ msgid "Name"
 msgstr "Name"
 
 #: src/window.rs
-msgid "Entry Type"
-msgstr "Entry Type"
-
-#: src/window.rs
-msgid "Select from installed applications"
-msgstr "Select from installed applications"
-
-#: src/window.rs
-msgid "Enter custom command"
-msgstr "Enter custom command"
-
-#: src/window.rs
 msgid "Application"
 msgstr "Application"
 
@@ -192,3 +180,24 @@ msgstr "System-wide applications that start automatically"
 #: src/window.rs
 msgid "Limited access detected. Run these commands to enable full functionality:"
 msgstr "Limited access detected. Run these commands to enable full functionality:"
+
+#: src/window.rs
+msgid "Custom Command"
+msgstr "Custom Command"
+
+#: src/window.rs
+msgid "The name must contain letters or digits"
+msgstr "The name must contain letters or digits"
+
+#: src/entry_row.rs
+#: src/window.rs
+msgid "Could not save entry"
+msgstr "Could not save entry"
+
+#: src/entry_row.rs
+msgid "Could not change entry"
+msgstr "Could not change entry"
+
+#: src/entry_row.rs
+msgid "Could not delete entry"
+msgstr "Could not delete entry"
