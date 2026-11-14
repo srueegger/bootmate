@@ -72,58 +72,65 @@ If you prefer to build from source, see the [Building](#building) section below.
 
 ### Build Dependencies
 
-All build dependencies are provisioned inside a dedicated [Distrobox](https://distrobox.it/) container
-named `bootmate-devsystem` (Fedora 44 with GNOME 50 / libadwaita 1.9). The host only needs Distrobox
-and a container runtime (Podman or Docker).
+Nothing is installed on the host. All build dependencies live in one of two
+dedicated environments, both with GNOME 51 (GTK 4.24, libadwaita 1.10):
+
+| Host | Environment | Scripts |
+|------|-------------|---------|
+| Linux | [Distrobox](https://distrobox.it/) container `bootmate-devsystem` (Fedora 45) | `scripts/devbox-*.sh` |
+| macOS (or any host with [Multipass](https://multipass.run/)) | Multipass VM `bootmate-dev` (Ubuntu 26.10) | `scripts/vm-*.sh` |
 
 ## Building
 
-The repository ships helper scripts that execute every build step inside the container,
-so the host stays untouched.
+The repository ships helper scripts that execute every build step inside the
+container or VM, so the host stays untouched.
 
-### One-time setup
+### Linux: Distrobox
+
+```bash
+scripts/devbox-setup.sh             # one-time: create the container
+scripts/devbox-build.sh             # debug build in ./build
+scripts/devbox-build.sh release     # release build in ./build-release
+scripts/devbox-run.sh               # run ./build/src/bootmate
+scripts/devbox-flatpak.sh           # local Flatpak test build
+scripts/devbox-update.sh            # refresh packages inside the container
+scripts/devbox-enter.sh             # interactive shell
+```
+
+The container is created from
+[.distrobox/bootmate-devsystem.ini](.distrobox/bootmate-devsystem.ini). After a
+change of the base image (e.g. Fedora 44 → 45) recreate it:
+
+```bash
+distrobox rm --force bootmate-devsystem
+```
 
 ```bash
 scripts/devbox-setup.sh
 ```
 
-This creates the `bootmate-devsystem` container from
-[.distrobox/bootmate-devsystem.ini](.distrobox/bootmate-devsystem.ini), runs a full
-`dnf upgrade --refresh`, and installs the Meson + Rust + flatpak-builder toolchain inside it.
-
-To refresh packages later:
-
-```bash
-scripts/devbox-update.sh
-```
-
-### Development build
-
-```bash
-scripts/devbox-build.sh             # debug build in ./build
-scripts/devbox-run.sh               # run ./build/src/bootmate
-```
-
-### Release build
-
-```bash
-scripts/devbox-build.sh release     # release build in ./build-release
-```
-
-### Local Flatpak test build
-
-```bash
-scripts/devbox-flatpak.sh
-```
-
 All flatpak-builder state (state dir, OSTree repo, user installation) lives under
 `/var/cache/bootmate-flatpak/` **inside the container** — the host `$HOME` is never polluted.
 
-### Interactive shell
+### macOS: Multipass
 
 ```bash
-scripts/devbox-enter.sh
+scripts/vm-setup.sh                 # one-time: create the VM, mount the repo, install the toolchain
+scripts/vm-build.sh                 # debug build in ~/build (inside the VM)
+scripts/vm-build.sh release         # release build in ~/build-release (inside the VM)
+scripts/vm-test.sh                  # unit tests, meson tests, metainfo validation
+scripts/vm-flatpak.sh               # local Flatpak test build
+scripts/vm-update.sh                # refresh packages inside the VM
+scripts/vm-enter.sh                 # interactive shell
 ```
+
+The repository is mounted into the VM at `/home/ubuntu/bootmate`; build
+directories are kept in the VM's own home directory. The VM has no graphical
+session, so the app cannot simply be shown on the Mac.
+
+On Apple Silicon the VM is `aarch64`, so `scripts/vm-flatpak.sh` produces an
+ARM Flatpak. That is fine for testing; published builds are made in the
+Distrobox on an x86_64 host.
 
 ## Running
 

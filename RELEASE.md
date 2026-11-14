@@ -9,7 +9,7 @@ Diese Anleitung beschreibt den kompletten Prozess zum Veröffentlichen einer neu
 ### 1. Versionsnummer aktualisieren
 
 ```bash
-./update-version.sh 50.1
+./update-version.sh 51.0
 ```
 
 Das Script aktualisiert automatisch:
@@ -23,7 +23,7 @@ Das Script aktualisiert automatisch:
 Aktualisiere die Release-Beschreibung in `data/me.rueegger.bootmate.metainfo.xml.in`:
 
 ```xml
-<release version="50.1" date="2026-XX-XX">
+<release version="51.0" date="2026-XX-XX">
   <description>
     <p>Kurze Beschreibung</p>
     <ul>
@@ -36,47 +36,63 @@ Aktualisiere die Release-Beschreibung in `data/me.rueegger.bootmate.metainfo.xml
 
 ### 3. cargo-sources.json aktualisieren
 
-Falls sich Rust-Abhängigkeiten geändert haben:
+Falls sich Rust-Abhängigkeiten geändert haben (in der Build-Umgebung ausführen,
+auf dem Host ist kein Cargo installiert):
 
 ```bash
 cargo update
-python3 ~/Projects/me.rueegger.cargo/flatpak-cargo-generator.py Cargo.lock -o cargo-sources.json
+python3 flatpak-cargo-generator.py Cargo.lock -o cargo-sources.json
 ```
 
-### 4. Lokal testen (Flatpak)
+`flatpak-cargo-generator.py` stammt aus
+[flatpak-builder-tools](https://github.com/flatpak/flatpak-builder-tools) (Ordner `cargo/`).
+
+### 4. Lokal testen
+
+Linux (Distrobox):
 
 ```bash
-flatpak-builder --user --install --force-clean --disable-rofiles-fuse _flatpak me.rueegger.bootmate.yml
-flatpak run me.rueegger.bootmate
+scripts/devbox-build.sh
+scripts/devbox-flatpak.sh
+```
+
+macOS (Multipass, erzeugt auf Apple Silicon ein ARM-Flatpak):
+
+```bash
+scripts/vm-test.sh
+scripts/vm-flatpak.sh
 ```
 
 ### 5. Änderungen committen und pushen
 
 ```bash
 git add .
-git commit -m "Bump version to 50.1"
+git commit -m "Bump version to 51.0"
 git push
 ```
 
 ### 6. Tag erstellen und pushen
 
 ```bash
-git tag -a v50.1 -m "Release version 50.1"
-git push origin v50.1
+git tag -a v51.0 -m "Release version 51.0"
+git push origin v51.0
 ```
 
 ### 7. Flatpak veröffentlichen
 
+Nur auf dem Ubuntu-Rechner (x86_64): Das Skript braucht den Signaturschlüssel
+und baut in der Distrobox `bootmate-devsystem`.
+
 ```bash
-~/Projects/flatpak.rueegger.dev/publish.sh bootmate
+~/Sites/flatpak.rueegger.dev/publish.sh bootmate
 ```
 
 ### 8. GitHub Release erstellen
 
 1. Gehe zu: https://github.com/srueegger/bootmate/releases
 2. Klicke auf **"Draft a new release"**
-3. Wähle den Tag: `v50.1`
-4. Release Title: `Boot Mate 50.1`
+3. Wähle den Tag: `v51.0`
+4. Release Title: `Boot Mate 51.0`
 5. Beschreibung mit Features/Fixes
 6. Klicke auf **"Publish release"**
 
@@ -106,11 +122,6 @@ git push origin v50.1
 ### Versionierung
 
 Boot Mate folgt dem GNOME-Versionsschema:
-- **MAJOR.MINOR** (z.B. 50.0, 50.1)
-- MAJOR: GNOME-Version (50 = GNOME 50)
+- **MAJOR.MINOR** (z.B. 51.0, 51.1)
+- MAJOR: GNOME-Version (51 = GNOME 51)
 - MINOR: Releases innerhalb des GNOME-Zyklus
-
----
-
-**Letzte Aktualisierung:** 2026-03-21
-**Aktuelle Version:** 50.0

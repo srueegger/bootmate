@@ -1,9 +1,10 @@
 # Development Notes for Claude Code
 
 ## Environment
-- Host OS: Ubuntu
-- IDE: RustRover
-- **All builds run inside the `bootmate-devsystem` Distrobox container** (Fedora 44, GNOME 50, libadwaita 1.9+). The host does not need any build dependencies.
+- Two development hosts: Ubuntu (IDE: RustRover) and macOS (Apple Silicon)
+- **Nothing is built on the host.** Builds run in one of two environments, both with GNOME 51 (GTK 4.24, libadwaita 1.10):
+  - Ubuntu host: `bootmate-devsystem` Distrobox container (Fedora 45), scripts `scripts/devbox-*.sh`
+  - macOS host: `bootmate-dev` Multipass VM (Ubuntu 26.10), scripts `scripts/vm-*.sh`
 
 ## App Identity
 - App ID: `me.rueegger.bootmate` (domain: rueegger.me)
@@ -30,6 +31,21 @@ All test-flatpak state (state dir, OSTree repo, flatpak-builder build dir, per-u
 
 Host-side `meson`/`cargo`/`flatpak-builder` invocations are intentionally not used any more.
 
+### Multipass workflow (macOS)
+```bash
+scripts/vm-setup.sh                # one-time: create the VM, mount the repo, install the toolchain
+scripts/vm-build.sh                # meson compile (debug), build dir ~/build inside the VM
+scripts/vm-build.sh release        # meson compile (release), build dir ~/build-release inside the VM
+scripts/vm-test.sh                 # cargo test + meson test + metainfo validation
+scripts/vm-flatpak.sh              # local flatpak-builder test build (state in ~/flatpak inside the VM)
+scripts/vm-update.sh               # apt full-upgrade inside the VM
+scripts/vm-enter.sh                # interactive shell inside the VM
+```
+
+- The repo is mounted at `/home/ubuntu/bootmate`. Build directories must stay outside the mount; `sed -i` and other rename-based tools fail on it.
+- The VM has no graphical session. For a UI check run the app under `xvfb-run` and take a screenshot.
+- On Apple Silicon the VM is `aarch64`: Flatpaks built there are ARM-only test builds. Published builds come from the Distrobox on the x86_64 Ubuntu host.
+
 ## Distribution
 - **Flatpak is the only distribution method** (no DEB, no RPM)
 - Own Flatpak repository at `https://flatpak.rueegger.dev`
@@ -39,7 +55,7 @@ Host-side `meson`/`cargo`/`flatpak-builder` invocations are intentionally not us
 - Server: `scifitre@flatpak.rueegger.dev` (cPanel shared hosting, Apache, static files only)
 
 ### Publishing a new version
-The publish script runs on the host (it needs the signing key and rsync/SSH setup). The build itself happens inside the container — the publish script invokes `scripts/devbox-flatpak.sh` under the hood.
+The publish script runs on the Ubuntu host only (it needs the signing key and rsync/SSH setup, and re-enters the Distrobox). The build itself happens inside the container — the publish script invokes `scripts/devbox-flatpak.sh` under the hood.
 
 ```bash
 ~/Sites/flatpak.rueegger.dev/publish.sh bootmate

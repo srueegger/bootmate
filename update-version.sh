@@ -20,59 +20,72 @@ fi
 
 echo "Updating version to $NEW_VERSION..."
 
-# Update meson.build
-echo "  - meson.build"
-sed -i "s/version: '[0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?'/version: '$NEW_VERSION'/" meson.build
-
-# Update Cargo.toml (requires 3-component semver, append .0 for X.Y versions)
-echo "  - Cargo.toml"
+# Cargo requires 3-component semver, append .0 for X.Y versions
 if [[ "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+$ ]]; then
     CARGO_VERSION="${NEW_VERSION}.0"
 else
     CARGO_VERSION="$NEW_VERSION"
 fi
-sed -i "s/^version = \"[0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?\"/version = \"$CARGO_VERSION\"/" Cargo.toml
 
-# Update po files
-echo "  - po/en.po"
-sed -i "s/Project-Id-Version: bootmate [0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?/Project-Id-Version: bootmate $NEW_VERSION/" po/en.po
-
-echo "  - po/de.po"
-sed -i "s/Project-Id-Version: bootmate [0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?/Project-Id-Version: bootmate $NEW_VERSION/" po/de.po
-
-# Update metainfo.xml.in - prepend a new release stub; never touch older entries
-echo "  - data/me.rueegger.bootmate.metainfo.xml.in"
 CURRENT_DATE=$(date +%Y-%m-%d)
-METAINFO="data/me.rueegger.bootmate.metainfo.xml.in"
 
-if grep -q "<release version=\"$NEW_VERSION\"" "$METAINFO"; then
-    echo "    (release $NEW_VERSION already present — leaving changelog untouched)"
-else
-    python3 - "$NEW_VERSION" "$CURRENT_DATE" "$METAINFO" <<'PYEOF'
+# All edits are done by Python, writing the files in place. 'sed -i' differs
+# between GNU and BSD/macOS and fails on some mounted file systems.
+python3 - "$NEW_VERSION" "$CARGO_VERSION" "$CURRENT_DATE" <<'PYEOF'
+import re
 import sys
-version, date, path = sys.argv[1], sys.argv[2], sys.argv[3]
-with open(path, 'r', encoding='utf-8') as f:
+
+version, cargo_version, date = sys.argv[1:4]
+VERSION_RE = r"[0-9]+\.[0-9]+(?:\.[0-9]+)?"
+
+
+def replace_once(path, pattern, replacement):
+    with open(path, encoding="utf-8") as f:
+        content = f.read()
+    new_content, count = re.subn(pattern, replacement, content, count=1, flags=re.MULTILINE)
+    if count != 1:
+        sys.exit(f"Error: version pattern not found in {path}")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(new_content)
+    print(f"  - {path}")
+
+
+replace_once("meson.build", rf"version: '{VERSION_RE}'", f"version: '{version}'")
+replace_once("Cargo.toml", rf'^version = "{VERSION_RE}"', f'version = "{cargo_version}"')
+for po in ("po/en.po", "po/de.po"):
+    replace_once(
+        po,
+        rf"Project-Id-Version: bootmate {VERSION_RE}",
+        f"Project-Id-Version: bootmate {version}",
+    )
+
+# metainfo.xml.in - prepend a new release stub; never touch older entries
+path = "data/me.rueegger.bootmate.metainfo.xml.in"
+with open(path, encoding="utf-8") as f:
     content = f.read()
-marker = '<releases>'
-idx = content.find(marker)
-if idx == -1:
-    sys.exit(f"<releases> tag not found in {path}")
-insert_at = idx + len(marker)
-stub = (
-    f"\n    <release version=\"{version}\" date=\"{date}\">\n"
-    f"      <description>\n"
-    f"        <p>TODO: short summary</p>\n"
-    f"        <ul>\n"
-    f"          <li>TODO: changelog entry</li>\n"
-    f"        </ul>\n"
-    f"      </description>\n"
-    f"    </release>"
-)
-with open(path, 'w', encoding='utf-8') as f:
-    f.write(content[:insert_at] + stub + content[insert_at:])
+print(f"  - {path}")
+if f'<release version="{version}"' in content:
+    print(f"    (release {version} already present - leaving changelog untouched)")
+else:
+    marker = "<releases>"
+    idx = content.find(marker)
+    if idx == -1:
+        sys.exit(f"Error: <releases> tag not found in {path}")
+    insert_at = idx + len(marker)
+    stub = (
+        f"\n    <release version=\"{version}\" date=\"{date}\">\n"
+        f"      <description>\n"
+        f"        <p>TODO: short summary</p>\n"
+        f"        <ul>\n"
+        f"          <li>TODO: changelog entry</li>\n"
+        f"        </ul>\n"
+        f"      </description>\n"
+        f"    </release>"
+    )
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content[:insert_at] + stub + content[insert_at:])
+    print(f"    (prepended release {version} stub - fill in the <li> entries)")
 PYEOF
-    echo "    (prepended release $NEW_VERSION stub — fill in the <li> entries)"
-fi
 
 echo ""
 echo "Version updated to $NEW_VERSION successfully!"
@@ -86,5 +99,6 @@ echo "  - data/me.rueegger.bootmate.metainfo.xml.in (new release stub prepended)
 echo ""
 echo "Next steps:"
 echo "  1. Fill in the TODO changelog entries in data/me.rueegger.bootmate.metainfo.xml.in"
-echo "  2. Review changes: git diff"
-echo "  3. Commit: git add . && git commit -m 'Bump version to $NEW_VERSION'"
+echo "  2. Build once (this updates the version in Cargo.lock)"
+echo "  3. Review changes: git diff"
+echo "  4. Commit: git add . && git commit -m 'Bump version to $NEW_VERSION'"
