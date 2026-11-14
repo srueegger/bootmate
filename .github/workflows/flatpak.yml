@@ -41,7 +41,7 @@ jobs:
             libgtk-4-dev libadwaita-1-dev libglib2.0-dev-bin libxml2-utils \
             gettext desktop-file-utils appstream
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Unit tests
         run: cargo test
@@ -68,7 +68,7 @@ jobs:
       image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-51
       options: --privileged
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build Flatpak
         run: |
@@ -88,7 +88,7 @@ jobs:
       - name: Pack build repository
         run: tar -cf build-repo-${{ matrix.arch }}.tar build-repo
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: build-repo-${{ matrix.arch }}
           path: build-repo-${{ matrix.arch }}.tar
@@ -117,7 +117,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y flatpak ostree rsync gnupg
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: build-repo-*
           merge-multiple: true
@@ -163,7 +163,12 @@ jobs:
 
       - name: Import and sign builds
         run: |
-          for archive in build-repo-*.tar; do
+          archives=$(find . -name 'build-repo-*.tar' | sort)
+          if [ -z "$archives" ]; then
+            echo "No build artifacts found" >&2
+            exit 1
+          fi
+          for archive in $archives; do
             rm -rf build-repo
             tar -xf "$archive"
             flatpak build-commit-from \
