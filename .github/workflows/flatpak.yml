@@ -73,11 +73,22 @@ jobs:
       - name: Build Flatpak
         run: |
           flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+          # The image ships the GNOME SDK and Platform; only the Rust
+          # extension is missing. Install just that instead of using
+          # --install-deps-from: that option also tries to update the
+          # preinstalled SDK, which fails inside the container ("Invalid
+          # cross-device link") and crashes flatpak-builder.
+          runtime_version=$(sed -n "s/^runtime-version: *'\(.*\)'/\1/p" "$MANIFEST")
+          extension_branch=$(flatpak info --show-metadata "org.gnome.Sdk//$runtime_version" \
+            | sed -n '/^\[Extension org.freedesktop.Sdk.Extension\]/,/^\[/s/^version *= *//p')
+          flatpak install -y --noninteractive flathub \
+            "org.freedesktop.Sdk.Extension.rust-stable/${{ matrix.arch }}/$extension_branch"
+
           flatpak-builder \
             --arch=${{ matrix.arch }} \
             --force-clean \
             --disable-rofiles-fuse \
-            --install-deps-from=flathub \
             --default-branch="$FLATPAK_BRANCH" \
             --repo=build-repo \
             _flatpak \
