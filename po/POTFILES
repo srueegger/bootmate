@@ -2,4 +2,7 @@ data/me.rueegger.bootmate.desktop.in
 data/me.rueegger.bootmate.metainfo.xml.in
 src/main.rs
 src/application.rs
+src/entry_row.rs
 src/window.rs
+data/ui/window.ui
+data/ui/shortcuts.ui

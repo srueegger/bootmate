@@ -103,7 +103,8 @@ impl BootMateApplication {
             .application_name(gettext("Boot Mate"))
             .application_icon("me.rueegger.bootmate")
             .developer_name("Samuel Rüegger")
-            .version(VERSION)
+            // Cargo needs three components; show "51.0" instead of "51.0.0"
+            .version(VERSION.strip_suffix(".0").unwrap_or(VERSION))
             .developers(vec![
                 "Samuel Rüegger https://rueegger.me",
                 "Actionschnitzel https://github.com/actionschnitzel",

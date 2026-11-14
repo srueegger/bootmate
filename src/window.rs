@@ -358,63 +358,72 @@ impl BootMateWindow {
                         command_row.text().trim().to_string()
                     };
 
-                    // Cannot happen via the UI: "Add" is disabled until both are set
-                    if name.is_empty() || command.is_empty() {
-                        return;
-                    }
-
-                    // Generate a filename from the entry name
-                    let stem = name
-                        .to_lowercase()
-                        .replace(" ", "-")
-                        .chars()
-                        .filter(|c| c.is_alphanumeric() || *c == '-')
-                        .collect::<String>();
-
-                    if !stem.chars().any(|c| c.is_alphanumeric()) {
-                        window.show_toast(&gettext("The name must contain letters or digits"));
-                        return;
-                    }
-
-                    let filename = stem + ".desktop";
-                    let file_path = AutostartEntry::user_autostart_path().join(&filename);
-
-                    // Check if file already exists
-                    if file_path.exists() {
-                        let error_dialog = adw::AlertDialog::builder()
-                            .heading(gettext("Entry Already Exists"))
-                            .body(gettext("An autostart entry with this name already exists. Please choose a different name."))
-                            .build();
-                        error_dialog.add_response("ok", &gettext("OK"));
-                        error_dialog.set_default_response(Some("ok"));
-                        error_dialog.set_close_response("ok");
-                        error_dialog.present(Some(&window));
-                        return;
-                    }
-
-                    // Create new autostart entry
-                    let entry = AutostartEntry {
-                        name,
-                        exec: command,
-                        icon: None,
-                        comment: None,
-                        enabled: true,
-                        file_path,
-                        is_user_entry: true,
-                    };
-
-                    if let Err(e) = entry.save(&entry.exec) {
-                        eprintln!("Failed to save entry: {}", e);
-                        window.show_toast(&format!("{}: {}", gettext("Could not save entry"), e));
-                    } else {
-                        window.load_autostart_entries();
-                    }
+                    window.add_entry(name, command);
                 }
             ),
         );
 
         dialog.set_focus(Some(&name_row));
         dialog.present(Some(self));
+    }
+
+    /// Create a new user autostart entry.
+    ///
+    /// Kept outside of the `glib::clone!` closure above on purpose: xgettext
+    /// does not look into macro invocations, so translatable strings in
+    /// there would be missing from the translation template.
+    fn add_entry(&self, name: String, command: String) {
+        // Cannot happen via the UI: "Add" is disabled until both are set
+        if name.is_empty() || command.is_empty() {
+            return;
+        }
+
+        // Generate a filename from the entry name
+        let stem = name
+            .to_lowercase()
+            .replace(" ", "-")
+            .chars()
+            .filter(|c| c.is_alphanumeric() || *c == '-')
+            .collect::<String>();
+
+        if !stem.chars().any(|c| c.is_alphanumeric()) {
+            self.show_toast(&gettext("The name must contain letters or digits"));
+            return;
+        }
+
+        let filename = stem + ".desktop";
+        let file_path = AutostartEntry::user_autostart_path().join(&filename);
+
+        // Check if file already exists
+        if file_path.exists() {
+            let error_dialog = adw::AlertDialog::builder()
+                .heading(gettext("Entry Already Exists"))
+                .body(gettext("An autostart entry with this name already exists. Please choose a different name."))
+                .build();
+            error_dialog.add_response("ok", &gettext("OK"));
+            error_dialog.set_default_response(Some("ok"));
+            error_dialog.set_close_response("ok");
+            error_dialog.present(Some(self));
+            return;
+        }
+
+        // Create new autostart entry
+        let entry = AutostartEntry {
+            name,
+            exec: command,
+            icon: None,
+            comment: None,
+            enabled: true,
+            file_path,
+            is_user_entry: true,
+        };
+
+        if let Err(e) = entry.save(&entry.exec) {
+            eprintln!("Failed to save entry: {}", e);
+            self.show_toast(&format!("{}: {}", gettext("Could not save entry"), e));
+        } else {
+            self.load_autostart_entries();
+        }
     }
 
     fn show_shortcuts(&self) {
