@@ -6,7 +6,8 @@ use adw::prelude::*;
 use adw::subclass::prelude::*;
 use gettextrs::gettext;
 use gtk::glib;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
+use std::rc::Rc;
 
 mod imp {
     use super::*;
@@ -127,10 +128,18 @@ impl EntryRow {
 
         // Connect switch toggle handler
         let entry_clone = entry.clone();
+        let reverting = Rc::new(Cell::new(false));
         enable_switch.connect_state_set(glib::clone!(
             #[weak] row,
+            #[strong] reverting,
             #[upgrade_or] glib::Propagation::Proceed,
             move |switch, enabled| {
+                // Emitted by our own revert below: nothing to save, just let
+                // the switch follow.
+                if reverting.get() {
+                    return glib::Propagation::Proceed;
+                }
+
                 // Update visual state immediately
                 if enabled {
                     row.set_opacity(1.0);
@@ -147,9 +156,16 @@ impl EntryRow {
                 modified_entry.enabled = enabled;
 
                 if let Err(e) = modified_entry.set_enabled(enabled) {
-                    eprintln!("Failed to set enabled state: {}", e);
-                    // Revert the switch state on error
+                    row.show_error(&gettext("Could not change entry"), &e);
+                    // Revert the switch state on error (without saving again)
+                    reverting.set(true);
                     switch.set_active(!enabled);
+                    reverting.set(false);
+                    switch.set_tooltip_text(Some(&if enabled {
+                        gettext("Disabled")
+                    } else {
+                        gettext("Enabled")
+                    }));
                     row.set_opacity(if !enabled { 1.0 } else { 0.5 });
                     if !enabled {
                         row.remove_css_class("dim-label");
@@ -189,6 +205,14 @@ impl EntryRow {
         row
     }
 
+    /// Report a failed file operation in the window and on stderr
+    fn show_error(&self, message: &str, error: &str) {
+        eprintln!("{}: {}", message, error);
+        if let Some(window) = self.root().and_downcast::<crate::window::BootMateWindow>() {
+            window.show_toast(&format!("{}: {}", message, error));
+        }
+    }
+
     fn show_edit_dialog(&self, entry: &AutostartEntry) {
         let window = self.root().and_downcast::<gtk::Window>().unwrap();
 
@@ -221,7 +245,7 @@ impl EntryRow {
                 move |_, _| {
                     let new_exec = entry_widget.text();
                     if let Err(e) = entry_clone.save(&new_exec) {
-                        eprintln!("Failed to save entry: {}", e);
+                        row.show_error(&gettext("Could not save entry"), &e);
                     } else {
                         // Refresh the list
                         if let Some(window) = row.root().and_downcast::<crate::window::BootMateWindow>() {
@@ -259,7 +283,7 @@ impl EntryRow {
                 #[weak(rename_to = row)] self,
                 move |_, _| {
                     if let Err(e) = entry_clone.delete() {
-                        eprintln!("Failed to delete entry: {}", e);
+                        row.show_error(&gettext("Could not delete entry"), &e);
                     } else {
                         // Refresh the list
                         if let Some(window) = row.root().and_downcast::<crate::window::BootMateWindow>() {

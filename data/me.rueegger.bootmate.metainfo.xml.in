@@ -32,6 +32,22 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="51.0" date="2026-11-14">
+      <description>
+        <p>Major update aligning with GNOME 51</p>
+        <ul>
+          <li>Updated to GNOME 51 runtime and SDK</li>
+          <li>Updated GTK4 to 4.24 and libadwaita to 1.10</li>
+          <li>Enabling, disabling or editing an entry no longer drops other settings from its .desktop file (translations, OnlyShowIn, Terminal and similar keys are kept)</li>
+          <li>Deleting a system entry now really removes it from the list instead of turning it into a disabled user entry</li>
+          <li>Deleting a disabled system entry no longer re-enables it</li>
+          <li>Entries that override a system entry are now matched by file name, as defined by the XDG autostart specification</li>
+          <li>Errors while saving, changing or deleting an entry are now shown in the window</li>
+          <li>The "Add Autostart Entry" dialog uses a toggle to switch between application and custom command, and "Add" is only available once all fields are filled in</li>
+          <li>The Flatpak no longer warns about limited access on systems without /usr/share/gnome/autostart</li>
+        </ul>
+      </description>
+    </release>
     <release version="50.1" date="2026-04-19">
       <description>
         <p>Quality of life improvements</p>

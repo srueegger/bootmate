@@ -11,7 +11,7 @@
 
 ## Build System
 - Meson + Cargo (Rust edition 2024)
-- Dependencies: GTK4 >= 4.22.1, libadwaita >= 1.9.0, glib >= 2.66
+- Dependencies: GTK4 >= 4.24.0, libadwaita >= 1.10.0, glib >= 2.66
 
 ### Distrobox workflow
 The container definition lives in [.distrobox/bootmate-devsystem.ini](.distrobox/bootmate-devsystem.ini). Thin wrapper scripts in [scripts/](scripts/) execute commands inside the container:

@@ -34,6 +34,8 @@
           </object>
         </child>
         <property name="content">
+          <object class="AdwToastOverlay" id="toast_overlay">
+            <property name="child">
           <object class="GtkStack" id="main_stack">
             <property name="transition-type">crossfade</property>
 
@@ -155,6 +157,8 @@
                 </property>
               </object>
             </child>
+          </object>
+            </property>
           </object>
         </property>
       </object>

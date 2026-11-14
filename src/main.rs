@@ -15,7 +15,11 @@ use gtk::{gio, glib};
 
 fn main() -> glib::ExitCode {
     // Initialize locale from environment
-    setlocale(LocaleCategory::LcAll, "");
+    // SAFETY: called first thing in main, before any other thread exists that
+    // could read or modify the locale concurrently.
+    unsafe {
+        setlocale(LocaleCategory::LcAll, "");
+    }
 
     // Initialize gettext
     // For dev builds, try to use locale files from build directory

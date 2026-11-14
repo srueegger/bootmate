@@ -23,6 +23,8 @@ mod imp {
         #[template_child]
         pub sandbox_banner: TemplateChild<adw::Banner>,
         #[template_child]
+        pub toast_overlay: TemplateChild<adw::ToastOverlay>,
+        #[template_child]
         pub main_stack: TemplateChild<gtk::Stack>,
         #[template_child]
         pub status_page: TemplateChild<adw::StatusPage>,
@@ -102,6 +104,12 @@ impl BootMateWindow {
         self.add_action_entries([action_refresh, action_add_entry, action_show_shortcuts]);
     }
 
+    /// Show a short message at the bottom of the window
+    pub fn show_toast(&self, message: &str) {
+        let toast = adw::Toast::new(&glib::markup_escape_text(message));
+        self.imp().toast_overlay.add_toast(toast);
+    }
+
     pub fn load_autostart_entries(&self) {
         let imp = self.imp();
 
@@ -177,25 +185,21 @@ impl BootMateWindow {
             .title(gettext("Name"))
             .build();
 
-        // Mode switch group (for future use)
-        let _mode_group = adw::PreferencesGroup::builder()
-            .title(gettext("Entry Type"))
-            .build();
-
-        // Radio buttons for mode selection
-        let use_program_check = gtk::CheckButton::builder()
-            .label(gettext("Select from installed applications"))
-            .active(true)
-            .build();
-
-        let use_custom_check = gtk::CheckButton::builder()
-            .label(gettext("Enter custom command"))
-            .group(&use_program_check)
-            .build();
-
-        let radio_box = gtk::Box::new(gtk::Orientation::Vertical, 6);
-        radio_box.append(&use_program_check);
-        radio_box.append(&use_custom_check);
+        // Mode selection: installed application or custom command
+        let mode_group = adw::ToggleGroup::builder().homogeneous(true).build();
+        mode_group.add(
+            adw::Toggle::builder()
+                .name("program")
+                .label(gettext("Application"))
+                .build(),
+        );
+        mode_group.add(
+            adw::Toggle::builder()
+                .name("custom")
+                .label(gettext("Custom Command"))
+                .build(),
+        );
+        mode_group.set_active_name(Some("program"));
 
         // Program dropdown (initially visible)
         let program_row = adw::ComboRow::builder()
@@ -252,21 +256,54 @@ impl BootMateWindow {
             .build();
         command_row.add_suffix(&file_button);
 
-        // Toggle visibility based on mode
-        use_program_check.connect_toggled(glib::clone!(
-            #[weak] program_row,
+        // The "Add" button is only available once name and command are filled in
+        let update_add_enabled = Rc::new(glib::clone!(
+            #[weak] dialog,
+            #[weak] name_row,
             #[weak] command_row,
-            move |button| {
-                let use_program = button.is_active();
-                program_row.set_visible(use_program);
-                command_row.set_visible(!use_program);
+            #[weak] program_row,
+            #[weak] mode_group,
+            move || {
+                let has_command = if mode_group.active_name().as_deref() == Some("program") {
+                    program_row.selected() != gtk::INVALID_LIST_POSITION
+                } else {
+                    !command_row.text().trim().is_empty()
+                };
+                let has_name = !name_row.text().trim().is_empty();
+                dialog.set_response_enabled("add", has_name && has_command);
             }
         ));
+
+        // Toggle visibility based on mode
+        mode_group.connect_active_notify(glib::clone!(
+            #[weak] program_row,
+            #[weak] command_row,
+            #[strong] update_add_enabled,
+            move |group| {
+                let use_program = group.active_name().as_deref() == Some("program");
+                program_row.set_visible(use_program);
+                command_row.set_visible(!use_program);
+                update_add_enabled();
+            }
+        ));
+        name_row.connect_changed(glib::clone!(
+            #[strong] update_add_enabled,
+            move |_| update_add_enabled()
+        ));
+        command_row.connect_changed(glib::clone!(
+            #[strong] update_add_enabled,
+            move |_| update_add_enabled()
+        ));
+        program_row.connect_selected_notify(glib::clone!(
+            #[strong] update_add_enabled,
+            move |_| update_add_enabled()
+        ));
+        update_add_enabled();
 
         // Build the preferences group
         let preferences_group = adw::PreferencesGroup::new();
         preferences_group.add(&name_row);
-        main_box.append(&radio_box);
+        main_box.append(&mode_group);
         preferences_group.add(&program_row);
         preferences_group.add(&command_row);
 
@@ -303,11 +340,11 @@ impl BootMateWindow {
                 #[weak(rename_to = window)] self,
                 #[weak] name_row,
                 #[weak] command_row,
-                #[weak] use_program_check,
+                #[weak] mode_group,
                 #[weak] program_row,
                 move |_, _| {
-                    let name = name_row.text();
-                    let command = if use_program_check.is_active() {
+                    let name = name_row.text().trim().to_string();
+                    let command = if mode_group.active_name().as_deref() == Some("program") {
                         // Get selected program command
                         let selected = program_row.selected();
                         if selected == gtk::INVALID_LIST_POSITION {
@@ -318,23 +355,28 @@ impl BootMateWindow {
                             None => return,
                         }
                     } else {
-                        command_row.text().to_string()
+                        command_row.text().trim().to_string()
                     };
 
+                    // Cannot happen via the UI: "Add" is disabled until both are set
                     if name.is_empty() || command.is_empty() {
-                        // Show error notification
                         return;
                     }
 
                     // Generate a filename from the entry name
-                    let filename = name
+                    let stem = name
                         .to_lowercase()
                         .replace(" ", "-")
                         .chars()
                         .filter(|c| c.is_alphanumeric() || *c == '-')
-                        .collect::<String>()
-                        + ".desktop";
+                        .collect::<String>();
 
+                    if !stem.chars().any(|c| c.is_alphanumeric()) {
+                        window.show_toast(&gettext("The name must contain letters or digits"));
+                        return;
+                    }
+
+                    let filename = stem + ".desktop";
                     let file_path = AutostartEntry::user_autostart_path().join(&filename);
 
                     // Check if file already exists
@@ -352,7 +394,7 @@ impl BootMateWindow {
 
                     // Create new autostart entry
                     let entry = AutostartEntry {
-                        name: name.to_string(),
+                        name,
                         exec: command,
                         icon: None,
                         comment: None,
@@ -363,6 +405,7 @@ impl BootMateWindow {
 
                     if let Err(e) = entry.save(&entry.exec) {
                         eprintln!("Failed to save entry: {}", e);
+                        window.show_toast(&format!("{}: {}", gettext("Could not save entry"), e));
                     } else {
                         window.load_autostart_entries();
                     }
@@ -370,6 +413,7 @@ impl BootMateWindow {
             ),
         );
 
+        dialog.set_focus(Some(&name_row));
         dialog.present(Some(self));
     }
 
