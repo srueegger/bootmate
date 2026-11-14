@@ -1,0 +1,220 @@
+name: Flatpak
+
+# - Every push and pull request: run the tests and build the Flatpak for
+#   x86_64 and aarch64.
+# - Tags (v*) and manual runs with "publish" ticked: additionally sign the
+#   builds and upload them to https://flatpak.rueegger.dev.
+
+on:
+  push:
+    branches: [main, 'release-*']
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Sign and publish to flatpak.rueegger.dev
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  APP_ID: me.rueegger.bootmate
+  MANIFEST: me.rueegger.bootmate.yml
+  FLATPAK_BRANCH: stable
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-24.04
+    # Same distribution as the Multipass dev VM (GNOME 51)
+    container: ubuntu:26.10
+    steps:
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            build-essential meson ninja-build pkg-config git \
+            rustc cargo \
+            libgtk-4-dev libadwaita-1-dev libglib2.0-dev-bin libxml2-utils \
+            gettext desktop-file-utils appstream
+
+      - uses: actions/checkout@v4
+
+      - name: Unit tests
+        run: cargo test
+
+      - name: Meson build and tests
+        run: |
+          meson setup build
+          meson compile -C build
+          meson test -C build --print-errorlogs
+          appstreamcli validate --no-net build/data/${APP_ID}.metainfo.xml
+
+  build:
+    name: Build (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-24.04
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-51
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Flatpak
+        run: |
+          flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak-builder \
+            --arch=${{ matrix.arch }} \
+            --force-clean \
+            --disable-rofiles-fuse \
+            --install-deps-from=flathub \
+            --default-branch="$FLATPAK_BRANCH" \
+            --repo=build-repo \
+            _flatpak \
+            "$MANIFEST"
+
+      # The whole OSTree repository is passed on (not a single-file bundle):
+      # it contains the app together with its .Locale and .Debug extensions.
+      - name: Pack build repository
+        run: tar -cf build-repo-${{ matrix.arch }}.tar build-repo
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-repo-${{ matrix.arch }}
+          path: build-repo-${{ matrix.arch }}.tar
+          retention-days: 14
+
+  publish:
+    name: Publish
+    needs: [test, build]
+    if: >-
+      startsWith(github.ref, 'refs/tags/v') ||
+      (github.event_name == 'workflow_dispatch' && inputs.publish)
+    runs-on: ubuntu-24.04
+    # Secrets live in this environment; restrict it to tags and add a
+    # required reviewer in the repository settings.
+    environment: flatpak-publish
+    concurrency:
+      group: flatpak-publish
+      cancel-in-progress: false
+    env:
+      GPG_KEY_ID: A597D880A0505622AA55A6CB0718DBE47E8CA409
+      DEPLOY_TARGET: scifitre@rueegger.dev
+      DEPLOY_PATH: public_html/flatpak.rueegger.dev
+    steps:
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak ostree rsync gnupg
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: build-repo-*
+          merge-multiple: true
+
+      - name: Import signing key
+        env:
+          FLATPAK_GPG_PRIVATE_KEY_B64: ${{ secrets.FLATPAK_GPG_PRIVATE_KEY_B64 }}
+          FLATPAK_GPG_PASSPHRASE: ${{ secrets.FLATPAK_GPG_PASSPHRASE }}
+        run: |
+          export GNUPGHOME="$RUNNER_TEMP/gnupg"
+          echo "GNUPGHOME=$GNUPGHOME" >> "$GITHUB_ENV"
+          mkdir -m 700 "$GNUPGHOME"
+          echo allow-preset-passphrase > "$GNUPGHOME/gpg-agent.conf"
+          printf '%s' "$FLATPAK_GPG_PRIVATE_KEY_B64" | base64 -d | gpg --batch --import
+          gpg --batch --list-secret-keys "$GPG_KEY_ID" > /dev/null
+          # Only needed if the key is protected by a passphrase
+          if [ -n "$FLATPAK_GPG_PASSPHRASE" ]; then
+            gpg --batch --with-colons --with-keygrip --list-secret-keys "$GPG_KEY_ID" \
+              | awk -F: '$1 == "grp" { print $10 }' \
+              | while read -r keygrip; do
+                  printf '%s' "$FLATPAK_GPG_PASSPHRASE" \
+                    | "$(gpgconf --list-dirs libexecdir)/gpg-preset-passphrase" --preset "$keygrip"
+                done
+          fi
+
+      - name: Set up SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          mkdir -m 700 -p ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      # The server holds the only complete copy of the repository (it also
+      # contains other apps), so every publish starts from its current state.
+      - name: Fetch current repository from server
+        run: |
+          mkdir repo
+          rsync -rlpt "$DEPLOY_TARGET:$DEPLOY_PATH/repo/" repo/
+          ostree --repo=repo refs
+
+      - name: Import and sign builds
+        run: |
+          for archive in build-repo-*.tar; do
+            rm -rf build-repo
+            tar -xf "$archive"
+            flatpak build-commit-from \
+              --src-repo=build-repo \
+              --gpg-sign="$GPG_KEY_ID" \
+              --gpg-homedir="$GNUPGHOME" \
+              --no-update-summary \
+              repo
+          done
+
+      - name: Update repository metadata
+        run: |
+          flatpak build-update-repo \
+            --gpg-sign="$GPG_KEY_ID" \
+            --gpg-homedir="$GNUPGHOME" \
+            --generate-static-deltas \
+            --prune \
+            --prune-depth=3 \
+            --title="rueegger-dev" \
+            --comment="Flatpak repository by Samuel Rüegger" \
+            --homepage="https://rueegger.me" \
+            --default-branch="$FLATPAK_BRANCH" \
+            repo
+          ostree --repo=repo refs
+
+      # Same order as publish.sh: new objects first, then the refs and
+      # summary that point to them, and only then remove what is unused.
+      - name: Upload
+        run: |
+          rsync -rlpt --ignore-existing \
+            --exclude='tmp/' --exclude='state/' \
+            --include='/objects' --include='/objects/**' \
+            --include='/deltas' --include='/deltas/**' \
+            --include='/config' \
+            --exclude='*' \
+            repo/ "$DEPLOY_TARGET:$DEPLOY_PATH/repo/"
+
+          rsync -rlpt --delete \
+            --exclude='tmp/' --exclude='state/' \
+            --include='/refs' --include='/refs/**' \
+            --include='/summary' --include='/summary.sig' \
+            --include='/summaries' --include='/summaries/**' \
+            --exclude='*' \
+            repo/ "$DEPLOY_TARGET:$DEPLOY_PATH/repo/"
+
+          rsync -rlpt --delete \
+            --exclude='tmp/' --exclude='state/' \
+            repo/ "$DEPLOY_TARGET:$DEPLOY_PATH/repo/"
+
+      - name: Remove key material
+        if: always()
+        run: |
+          gpgconf --kill gpg-agent || true
+          rm -rf "$RUNNER_TEMP/gnupg" ~/.ssh/id_ed25519
